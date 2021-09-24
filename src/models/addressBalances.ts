@@ -52,7 +52,7 @@ export default class AddressBalances {
 
 class TokenDetails {
     percentage: number;
-    tokens: IToken[]; // img link
+    tokens: IToken[];
     address: string;
 
     constructor(details: any) { // find more TS compliant solution

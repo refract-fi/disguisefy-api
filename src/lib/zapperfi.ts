@@ -1,19 +1,20 @@
 import axios from 'axios';
 import { URLSearchParams } from 'url';
 import Disguise from '../models/disguise';
-import DisguiseCache from '../models/disguiseCache';
 import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
+import IStakingAsset from './interfaces/stakingAsset';
+import IAsset from './interfaces/asset';
 import AddressBalances from '../models/addressBalances';
 import {
     AssetCategories,
     getEmptyBalances,
     getEmptyAssets,
     getAssetCategories,
-    addAsset
+    addAsset,
+    extractTokens,
+    extractAssetImg
 } from './helpers';
-import { log } from 'console';
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 // gauge & single-staking return assets classified as non staking (pool, base, deposit, etc...)
 // they are still accounted for in staking since most of them are not listed in general balance route
@@ -56,6 +57,10 @@ class ZapperApi {
         let assets = getEmptyAssets();
 
         try {
+            let stakingBalance: number;
+            let stakingTokens: IAsset[];
+            let claimableTokens: IAsset[];
+
             let uniqueProtocols: any = await ZapperApi.getSupportedProtocols(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
             let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueProtocols);
             let responses = await Promise.all(promises);
@@ -81,12 +86,16 @@ class ZapperApi {
             }
 
             // special attention kid and needs its own dedicated route
-            let stakingBalance: number = await ZapperApi.getStakingBalances(disguise);
+            [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
             balances[AssetCategories.staking] = stakingBalance;
 
-            // for(let asset of assets['wallet']) {
-            //     console.log(asset);
-            // }
+            for(let stakingToken of stakingTokens) {
+                addAsset(assets, AssetCategories.staking, stakingToken);
+            }
+
+            for(let claimableToken of claimableTokens) {
+                addAsset(assets, AssetCategories.claimable, claimableToken);
+            }
 
             let addressBalances = new AddressBalances(balances, assets);
             let preset = new Preset(disguise.preset);
@@ -105,8 +114,10 @@ class ZapperApi {
     }
 
     // masterchef, gauge, single-staking
-    static async getStakingBalances(disguise: Disguise): Promise<number> {
-        let stakingBalance:number = 0;
+    static async getStakingBalances(disguise: Disguise): Promise<[number, IAsset[], IAsset[]]> {
+        let stakingBalance: number = 0;
+        let stakingTokens: IAsset[] = [];
+        let claimableTokens: IAsset[] = [];
 
         try {
             let promises = ZapperApi.stakingBalancePromiseGenerator(disguise);
@@ -114,17 +125,28 @@ class ZapperApi {
 
             for(let response of responses) {
                 let stakingList = response.data[disguise.address];
+
                 if(stakingList && stakingList.length > 0) {
                     for(let staking of stakingList) {
                         stakingBalance += parseFloat(staking.balanceUSD);
+
+                        // add claimable tokens
+                        if(staking.rewardTokens) {
+                            claimableTokens = claimableTokens.concat(extractTokens(staking.rewardTokens));
+                        }
+
+                        // add stacking tokens
+                        if(staking.tokens) {
+                            stakingTokens = stakingTokens.concat(extractTokens(staking.tokens));
+                        }
                     }
                 }
             }
 
-            return stakingBalance;
+            return [stakingBalance, stakingTokens, claimableTokens];
         } catch(e) {
             console.log(`[zapperFi.getStakingBalances]: ${e}`);
-            return 0;
+            return [0, [], []];
         }
     }
 

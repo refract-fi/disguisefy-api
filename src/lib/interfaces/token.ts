@@ -6,7 +6,7 @@ export default interface IToken {
     balance?: number;
     balanceUSD?: number;
     balanceRaw?: number;
-    tokens?: IToken;
+    tokens?: IToken[];
     img?: string;
     reserveRaw?: string;
     type?: string;

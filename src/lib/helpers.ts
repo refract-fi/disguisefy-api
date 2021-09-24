@@ -71,8 +71,9 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
 }
 
 // asset should be IAsset | IToken
-export function extractTokens(asset: any): IToken[] {
+export function extractTokens(asset: any): any {
     let tokens: IToken[] = [];
+
     if(asset.tokens) {
         if(asset.tokens[0].tokens) {
              // pools may have an array of tokens in the asset
@@ -83,7 +84,46 @@ export function extractTokens(asset: any): IToken[] {
                 delete token.reserve;
                 delete token.price;
                 delete token.balance;
-                delete token.balanceUSD;
+                // delete token.balanceUSD;
+                delete token.balanceRaw;
+                delete token.reserveRaw;
+                delete token.type;
+                delete token.decimals;
+                delete token.isCToken;
+                delete token.weight;
+    
+                token.img = extractAssetImg(token, asset.type)
+                tokens.push(token);
+            }
+        }
+    } else if(asset[0]?.type == 'pool') {
+        // special case where we do not want the deepest tokens
+        for(let poolAsset of asset) {
+            let poolAssetTokens = poolAsset.tokens;
+
+            for(let poolAssetToken of poolAssetTokens) {
+                poolAssetToken.img = extractAssetImg(poolAssetToken, AssetCategories.pool);
+            }
+
+            tokens.push({
+                address: poolAsset.address,
+                symbol: poolAsset.symbol,
+                balanceUSD: poolAsset.balanceUSD,
+                tokens: poolAssetTokens
+            });
+        }
+    } else if(asset[0] && asset[0].symbol) { 
+        if(asset[0].tokens) {
+            // asset has an array of tokens
+            tokens = extractTokens(asset[0].tokens);
+        } else {
+            // asset is an array of tokens
+            for(let token of asset) {
+                // clean up the token content
+                delete token.reserve;
+                delete token.price;
+                delete token.balance;
+                // delete token.balanceUSD;
                 delete token.balanceRaw;
                 delete token.reserveRaw;
                 delete token.type;
