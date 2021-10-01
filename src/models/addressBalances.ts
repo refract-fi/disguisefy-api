@@ -26,8 +26,6 @@ export default class AddressBalances {
         for(let [key, value] of Object.entries(this.balances)) {
             if(key != 'undefined') {
                 this.percentages[key] = value == 0 ? 0 : (value / total) * 100;
-            } else {
-                console.log('This asset type is not supported yet.');
             }
         }
 
@@ -39,14 +37,11 @@ export default class AddressBalances {
                     this.assetsPercentages[category] = {};
                 }
 
-                if(this.assetsPercentages[category].hasOwnProperty(token)) {
-                    console.log('this is weird');
-                }
-
                 this.assetsPercentages[category][token] = {
                     percentage: tokenDetails.percentage == 0 ? 0 : (tokenDetails.percentage / total) * 100,
                     tokens: tokenDetails.tokens,
-                    address: tokenDetails.address
+                    address: tokenDetails.address,
+                    img: tokenDetails.img
                 };
             }
         }
@@ -57,17 +52,20 @@ class TokenDetails {
     percentage: number;
     tokens: IToken[];
     address: string;
+    img?: string;
 
     constructor(details: any) { // find more TS compliant solution
         if(details[0]) {
             this.percentage = details[0].balance;
             this.tokens = details[0].tokens || [];
             this.address = details[0].address;
+            this.img = details[0].img || '';
         } else {
             //should not be used anymore
             this.percentage = details.balance;
             this.tokens = details.tokens;
             this.address = details.address;
+            this.img = details.img || '';
         }
     }
 }

@@ -5,13 +5,16 @@ import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
 import IStakingAsset from './interfaces/stakingAsset';
 import IAsset from './interfaces/asset';
+import IToken from './interfaces/token';
 import AddressBalances from '../models/addressBalances';
+
 import {
     AssetCategories,
     getEmptyBalances,
     getEmptyAssets,
     getAssetCategories,
     addAsset,
+    addToken,
     extractTokens,
     extractAssetImg
 } from './helpers';
@@ -58,8 +61,8 @@ class ZapperApi {
 
         try {
             let stakingBalance: number;
-            let stakingTokens: IAsset[];
-            let claimableTokens: IAsset[];
+            let stakingTokens: IToken[];
+            let claimableTokens: IToken[];
 
             let uniqueProtocols: any = await ZapperApi.getSupportedProtocols(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
             let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueProtocols);
@@ -92,16 +95,16 @@ class ZapperApi {
             }
 
             // special attention kid and needs its own dedicated route
-            // [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
-            // balances[AssetCategories.staking] = stakingBalance;
+            [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
+            balances[AssetCategories.staking] = stakingBalance;
 
-            // for(let stakingToken of stakingTokens) {
-            //     addAsset(assets, AssetCategories.staking, stakingToken);
-            // }
+            for(let stakingToken of stakingTokens) {
+                addToken(assets, AssetCategories.staking, stakingToken);
+            }
 
-            // for(let claimableToken of claimableTokens) {
-            //     addAsset(assets, AssetCategories.claimable, claimableToken);
-            // }
+            for(let claimableToken of claimableTokens) {
+                addToken(assets, AssetCategories.claimable, claimableToken);
+            }
 
             let addressBalances = new AddressBalances(balances, assets);
             let preset = new Preset(disguise.preset);
@@ -120,10 +123,10 @@ class ZapperApi {
     }
 
     // masterchef, gauge, single-staking
-    static async getStakingBalances(disguise: Disguise): Promise<[number, IAsset[], IAsset[]]> {
+    static async getStakingBalances(disguise: Disguise): Promise<[number, IToken[], IToken[]]> {
         let stakingBalance: number = 0;
-        let stakingTokens: IAsset[] = [];
-        let claimableTokens: IAsset[] = [];
+        let claimableTokens: IToken[] = [];
+        let stakingTokens: IToken[] = [];
 
         try {
             let promises = ZapperApi.stakingBalancePromiseGenerator(disguise);
@@ -138,12 +141,30 @@ class ZapperApi {
 
                         // add claimable tokens
                         if(staking.rewardTokens) {
-                            claimableTokens = claimableTokens.concat(extractTokens(staking.rewardTokens));
+                            for(let rewardToken of staking.rewardTokens) {
+                                claimableTokens.push({
+                                    address: rewardToken.address,
+                                    symbol: rewardToken.symbol,
+                                    balance: rewardToken.balanceUSD,
+                                    protocol: rewardToken.protocolDisplay || '',
+                                    label: rewardToken.label || rewardToken.symbol,
+                                    img: extractAssetImg(rewardToken, 'base')
+                                });
+                            }
                         }
 
                         // add stacking tokens
                         if(staking.tokens) {
-                            stakingTokens = stakingTokens.concat(extractTokens(staking.tokens));
+                            for(let stakingToken of staking.tokens) {
+                                stakingTokens.push({
+                                    address: stakingToken.address,
+                                    symbol: stakingToken.symbol,
+                                    balance: stakingToken.balanceUSD,
+                                    protocol: stakingToken.protocolDisplay || '',
+                                    label: stakingToken.label || stakingToken.symbol,
+                                    img: extractAssetImg(stakingToken, 'base')
+                                });
+                            }
                         }
                     }
                 }

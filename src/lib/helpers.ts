@@ -57,15 +57,13 @@ export function getEmptyAssets() {
 
 export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset) {
     let key = String(assetCategory);
-    let tokens: IToken[] = extractTokens2(asset);
+    let tokens: IToken[] = extractTokens(asset);
 
     if(assets[key].hasOwnProperty(asset.address)) {
         for(let token of tokens) {
             let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
             if(foundToken) {
                 foundToken.balance += token.balance;
-            } else {
-                console.log('BIG ERROR.');
             }
         }
         
@@ -75,9 +73,17 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
     }
 }
 
-// improved version of extractTokens
-// refactor if any good
-export function extractTokens2(asset: IAsset): IToken[] {
+export function addToken(assets: any, assetCategory: AssetCategories, token: IToken) {
+    let key = String(assetCategory);
+
+    if(assets[key].hasOwnProperty(token.address)) {
+        assets[key][token.address].balance += token.balanceUSD;
+    } else {
+        assets[key][token.address] = token;
+    }
+}
+
+export function extractTokens(asset: IAsset): IToken[] {
     let tokens: IToken[] = [];
     switch(asset.category) {
         case "debt":
@@ -198,82 +204,6 @@ export function extractTokens2(asset: IAsset): IToken[] {
             console.log(`Asset category ${asset.category} not supported`);
             break;
     }
-    return tokens;
-}
-
-// asset should be IAsset | IToken
-export function extractTokens(asset: any): any {
-    let tokens: IToken[] = [];
-
-    if(asset.tokens) {
-        if(asset.tokens[0].tokens) {
-             // pools may have an array of tokens in the asset
-            tokens = extractTokens(asset.tokens[0]);
-        } else {
-            for(let token of asset.tokens) {
-                // clean up the token content
-                delete token.reserve;
-                delete token.price;
-                delete token.balance;
-                delete token.balanceUSD;
-                delete token.balanceRaw;
-                delete token.reserveRaw;
-                delete token.type;
-                delete token.decimals;
-                delete token.isCToken;
-                delete token.weight;
-    
-                token.img = extractAssetImg(token, asset.type)
-                tokens.push(token);
-            }
-        }
-    } else if(asset[0]?.type == 'pool') {
-        // special case where we do not want the deepest tokens
-        for(let poolAsset of asset) {
-            let poolAssetTokens = poolAsset.tokens;
-
-            for(let poolAssetToken of poolAssetTokens) {
-                poolAssetToken.img = extractAssetImg(poolAssetToken, AssetCategories.pool);
-            }
-
-            tokens.push({
-                address: poolAsset.address,
-                symbol: poolAsset.symbol,
-                // balanceUSD: poolAsset.balanceUSD,
-                tokens: poolAssetTokens
-            });
-        }
-    } else if(asset[0] && asset[0].symbol) { 
-        if(asset[0].tokens) {
-            // asset has an array of tokens
-            tokens = extractTokens(asset[0].tokens);
-        } else {
-            // asset is an array of tokens
-            for(let token of asset) {
-                // clean up the token content
-                delete token.reserve;
-                delete token.price;
-                delete token.balance;
-                // delete token.balanceUSD;
-                delete token.balanceRaw;
-                delete token.reserveRaw;
-                delete token.type;
-                delete token.decimals;
-                delete token.isCToken;
-                delete token.weight;
-    
-                token.img = extractAssetImg(token, asset.type)
-                tokens.push(token);
-            }
-        }
-    } else {
-        tokens.push({
-            address: asset.address,
-            symbol: asset.symbol,
-            img: extractAssetImg(asset, asset.type)
-        });
-    }
-
     return tokens;
 }
 
