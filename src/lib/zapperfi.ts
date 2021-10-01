@@ -157,19 +157,41 @@ class ZapperApi {
                             }
                         }
 
-                        // add stacking tokens
-                        if(staking.tokens) {
-                            for(let stakingToken of staking.tokens) {
-                                stakingTokens.push({
-                                    address: stakingToken.address,
-                                    symbol: stakingToken.symbol,
-                                    balance: stakingToken.balanceUSD,
-                                    protocol: stakingToken.protocolDisplay || '',
-                                    label: stakingToken.label || stakingToken.symbol,
-                                    img: extractAssetImg(stakingToken, 'base')
-                                });
+                        let assetTokens = staking.tokens;
+                        if(assetTokens && assetTokens.length > 0) {
+                            for(let assetToken of assetTokens) {
+                                assetToken.img = extractAssetImg(assetToken, stakingList.category);
+                                delete assetToken.address;
+                                delete assetToken.balance;
+                                delete assetToken.balanceUSD;
+                                delete assetToken.decimals;
+                                delete assetToken.price;
+                                delete assetToken.type;
                             }
                         }
+
+                        // add stacking position with tokens for images
+                        stakingTokens.push({
+                            address: staking.address,
+                            symbol: staking.symbol,
+                            balance: staking.balanceUSD,
+                            protocol: staking.protocolDisplay || '',
+                            label: staking.label || staking.symbol,
+                            tokens: assetTokens
+                        });
+                        // we most likely want the pool asset
+                        // if(staking.tokens) {
+                        //     for(let stakingToken of staking.tokens) {
+                        //         stakingTokens.push({
+                        //             address: stakingToken.address,
+                        //             symbol: stakingToken.symbol,
+                        //             balance: stakingToken.balanceUSD,
+                        //             protocol: stakingToken.protocolDisplay || '',
+                        //             label: stakingToken.label || stakingToken.symbol,
+                        //             img: extractAssetImg(stakingToken, 'base')
+                        //         });
+                        //     }
+                        // }
                     }
                 }
             }
