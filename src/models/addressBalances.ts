@@ -41,7 +41,8 @@ export default class AddressBalances {
                     percentage: tokenDetails.percentage == 0 ? 0 : (tokenDetails.percentage / total) * 100,
                     tokens: tokenDetails.tokens,
                     address: tokenDetails.address,
-                    img: tokenDetails.img
+                    img: tokenDetails.img,
+                    label: tokenDetails.label
                 };
             }
         }
@@ -53,6 +54,7 @@ class TokenDetails {
     tokens: IToken[];
     address: string;
     img?: string;
+    label: string;
 
     constructor(details: any) { // find more TS compliant solution
         if(details[0]) {
@@ -60,12 +62,14 @@ class TokenDetails {
             this.tokens = details[0].tokens || [];
             this.address = details[0].address;
             this.img = details[0].img || '';
+            this.label = details[0].label;
         } else {
             //should not be used anymore
             this.percentage = details.balance;
             this.tokens = details.tokens;
             this.address = details.address;
             this.img = details.img || '';
+            this.label = details.label;
         }
     }
 }
