@@ -16,6 +16,24 @@ export default class Preset {
                 if(addressBalances.assetsPercentages.hasOwnProperty('nft')) {
                     addressBalances.assetsPercentages['nft'] = {};
                 }
+
+                for(let [category, assetList] of Object.entries(addressBalances.assetsPercentages)) {
+                    if(Object.keys(assetList).length > 0) {
+                        for(let [assetAddress, assetDetails] of Object.entries(assetList)) {
+                            if(assetDetails.tokens && assetDetails.tokens.length > 0) {
+                                for(let token of assetDetails.tokens) {
+                                    delete token.balance;
+                                    delete token.balanceRaw;
+                                    delete token.balanceUSD;
+                                    delete token.reserve;
+                                    delete token.reserveRaw;
+                                    delete token.decimals;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 break;
 
             default:
