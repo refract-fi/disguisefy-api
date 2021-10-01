@@ -160,7 +160,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                     assetToken.img = extractAssetImg(assetToken, asset.category);
                 }
             }
-
+            
             tokens.push({
                 address: asset.address,
                 symbol: asset.symbol,

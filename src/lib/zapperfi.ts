@@ -86,9 +86,13 @@ class ZapperApi {
                                 asset.category = 'staking';  
                             }
 
-                            let assetCategory: AssetCategories = getAssetCategories(asset.category);
-                            balances[assetCategory] += asset.balanceUSD;
-                            addAsset(assets, assetCategory, asset);
+                            if(asset.category == 'pool' && asset.location && (asset.location.type == 'staked' || asset.location.type == 'staking')) {
+                                // do not add this is pool as we will likely receive it from staking-balances
+                            } else {
+                                let assetCategory: AssetCategories = getAssetCategories(asset.category);
+                                balances[assetCategory] += asset.balanceUSD;
+                                addAsset(assets, assetCategory, asset);
+                            }
                         }
                     }
                 }
