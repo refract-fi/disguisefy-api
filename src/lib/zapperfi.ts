@@ -5,13 +5,16 @@ import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
 import IStakingAsset from './interfaces/stakingAsset';
 import IAsset from './interfaces/asset';
+import IToken from './interfaces/token';
 import AddressBalances from '../models/addressBalances';
+
 import {
     AssetCategories,
     getEmptyBalances,
     getEmptyAssets,
     getAssetCategories,
     addAsset,
+    addToken,
     extractTokens,
     extractAssetImg
 } from './helpers';
@@ -58,8 +61,8 @@ class ZapperApi {
 
         try {
             let stakingBalance: number;
-            let stakingTokens: IAsset[];
-            let claimableTokens: IAsset[];
+            let stakingTokens: IToken[];
+            let claimableTokens: IToken[];
 
             let uniqueProtocols: any = await ZapperApi.getSupportedProtocols(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
             let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueProtocols);
@@ -72,14 +75,24 @@ class ZapperApi {
                 for(let addressProtocol of addressesProtocol) {
                     for(let product of addressProtocol.products) {
                         for(let asset of product.assets) {
-                            // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
-                            if(asset.category == 'staked') {
+                            if(!asset.category) {
+                                if(asset.location && asset.location.type) {
+                                    asset.category = asset.location.type; // put the location type in category (some edge cases)
+                                }
+                            }
+                            
+                            if(asset.category == 'staked') { 
+                                // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
                                 asset.category = 'staking';  
                             }
 
-                            let assetCategory: AssetCategories = getAssetCategories(asset.category);
-                            balances[assetCategory] += asset.balanceUSD;
-                            addAsset(assets, assetCategory, asset);
+                            if(asset.category == 'pool' && asset.location && (asset.location.type == 'staked' || asset.location.type == 'staking')) {
+                                // do not add this is pool as we will likely receive it from staking-balances
+                            } else {
+                                let assetCategory: AssetCategories = getAssetCategories(asset.category);
+                                balances[assetCategory] += asset.balanceUSD;
+                                addAsset(assets, assetCategory, asset);
+                            }
                         }
                     }
                 }
@@ -90,11 +103,11 @@ class ZapperApi {
             balances[AssetCategories.staking] = stakingBalance;
 
             for(let stakingToken of stakingTokens) {
-                addAsset(assets, AssetCategories.staking, stakingToken);
+                addToken(assets, AssetCategories.staking, stakingToken);
             }
 
             for(let claimableToken of claimableTokens) {
-                addAsset(assets, AssetCategories.claimable, claimableToken);
+                addToken(assets, AssetCategories.claimable, claimableToken);
             }
 
             let addressBalances = new AddressBalances(balances, assets);
@@ -114,10 +127,10 @@ class ZapperApi {
     }
 
     // masterchef, gauge, single-staking
-    static async getStakingBalances(disguise: Disguise): Promise<[number, IAsset[], IAsset[]]> {
+    static async getStakingBalances(disguise: Disguise): Promise<[number, IToken[], IToken[]]> {
         let stakingBalance: number = 0;
-        let stakingTokens: IAsset[] = [];
-        let claimableTokens: IAsset[] = [];
+        let claimableTokens: IToken[] = [];
+        let stakingTokens: IToken[] = [];
 
         try {
             let promises = ZapperApi.stakingBalancePromiseGenerator(disguise);
@@ -132,13 +145,53 @@ class ZapperApi {
 
                         // add claimable tokens
                         if(staking.rewardTokens) {
-                            claimableTokens = claimableTokens.concat(extractTokens(staking.rewardTokens));
+                            for(let rewardToken of staking.rewardTokens) {
+                                claimableTokens.push({
+                                    address: rewardToken.address,
+                                    symbol: rewardToken.symbol,
+                                    balance: rewardToken.balanceUSD,
+                                    protocol: rewardToken.protocolDisplay || '',
+                                    label: rewardToken.label || rewardToken.symbol,
+                                    img: extractAssetImg(rewardToken, 'base')
+                                });
+                            }
                         }
 
-                        // add stacking tokens
-                        if(staking.tokens) {
-                            stakingTokens = stakingTokens.concat(extractTokens(staking.tokens));
+                        let assetTokens = staking.tokens;
+                        if(assetTokens && assetTokens.length > 0) {
+                            for(let assetToken of assetTokens) {
+                                assetToken.img = extractAssetImg(assetToken, stakingList.category);
+                                delete assetToken.address;
+                                delete assetToken.balance;
+                                delete assetToken.balanceUSD;
+                                delete assetToken.decimals;
+                                delete assetToken.price;
+                                delete assetToken.type;
+                            }
                         }
+
+                        // add stacking position with tokens for images
+                        stakingTokens.push({
+                            address: staking.address,
+                            symbol: staking.symbol,
+                            balance: staking.balanceUSD,
+                            protocol: staking.protocolDisplay || '',
+                            label: staking.label || staking.symbol,
+                            tokens: assetTokens
+                        });
+                        // we most likely want the pool asset
+                        // if(staking.tokens) {
+                        //     for(let stakingToken of staking.tokens) {
+                        //         stakingTokens.push({
+                        //             address: stakingToken.address,
+                        //             symbol: stakingToken.symbol,
+                        //             balance: stakingToken.balanceUSD,
+                        //             protocol: stakingToken.protocolDisplay || '',
+                        //             label: stakingToken.label || stakingToken.symbol,
+                        //             img: extractAssetImg(stakingToken, 'base')
+                        //         });
+                        //     }
+                        // }
                     }
                 }
             }

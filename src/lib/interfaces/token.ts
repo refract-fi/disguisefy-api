@@ -11,6 +11,8 @@ export default interface IToken {
     reserveRaw?: string;
     type?: string;
     decimals?: number;
+    protocol?: string;
+    label?: string;
     isCToken?: boolean;
     weight?: number;
     share?: number;

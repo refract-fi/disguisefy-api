@@ -59,90 +59,151 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset);
 
-    if(assets[key].hasOwnProperty(asset.symbol)) {
-        assets[key][asset.symbol]['balance'] += asset.balanceUSD;
+    if(assets[key].hasOwnProperty(asset.address)) {
+        for(let token of tokens) {
+            let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
+            if(foundToken) {
+                foundToken.balance += token.balance;
+            }
+        }
+        
+        assets[key][asset.address].balance += asset.balanceUSD;
     } else {
-        assets[key][asset.symbol] = {
-            balance: asset.balanceUSD,
-            tokens: tokens,
-            address: asset.address
-        };
+        assets[key][asset.address] = tokens;
     }
 }
 
-// asset should be IAsset | IToken
-export function extractTokens(asset: any): any {
-    let tokens: IToken[] = [];
+export function addToken(assets: any, assetCategory: AssetCategories, token: IToken) {
+    let key = String(assetCategory);
 
-    if(asset.tokens) {
-        if(asset.tokens[0].tokens) {
-             // pools may have an array of tokens in the asset
-            tokens = extractTokens(asset.tokens[0]);
-        } else {
-            for(let token of asset.tokens) {
-                // clean up the token content
-                delete token.reserve;
-                delete token.price;
-                delete token.balance;
-                // delete token.balanceUSD;
-                delete token.balanceRaw;
-                delete token.reserveRaw;
-                delete token.type;
-                delete token.decimals;
-                delete token.isCToken;
-                delete token.weight;
-    
-                token.img = extractAssetImg(token, asset.type)
-                tokens.push(token);
-            }
-        }
-    } else if(asset[0]?.type == 'pool') {
-        // special case where we do not want the deepest tokens
-        for(let poolAsset of asset) {
-            let poolAssetTokens = poolAsset.tokens;
-
-            for(let poolAssetToken of poolAssetTokens) {
-                poolAssetToken.img = extractAssetImg(poolAssetToken, AssetCategories.pool);
-            }
-
-            tokens.push({
-                address: poolAsset.address,
-                symbol: poolAsset.symbol,
-                balanceUSD: poolAsset.balanceUSD,
-                tokens: poolAssetTokens
-            });
-        }
-    } else if(asset[0] && asset[0].symbol) { 
-        if(asset[0].tokens) {
-            // asset has an array of tokens
-            tokens = extractTokens(asset[0].tokens);
-        } else {
-            // asset is an array of tokens
-            for(let token of asset) {
-                // clean up the token content
-                delete token.reserve;
-                delete token.price;
-                delete token.balance;
-                // delete token.balanceUSD;
-                delete token.balanceRaw;
-                delete token.reserveRaw;
-                delete token.type;
-                delete token.decimals;
-                delete token.isCToken;
-                delete token.weight;
-    
-                token.img = extractAssetImg(token, asset.type)
-                tokens.push(token);
-            }
-        }
+    if(assets[key].hasOwnProperty(token.address)) {
+        assets[key][token.address].balance += token.balanceUSD;
     } else {
-        tokens.push({
-            address: asset.address,
-            symbol: asset.symbol,
-            img: extractAssetImg(asset, asset.type)
-        });
+        assets[key][token.address] = token;
     }
+}
 
+export function extractTokens(asset: IAsset): IToken[] {
+    let tokens: IToken[] = [];
+    switch(asset.category) {
+        case "debt":
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.img
+            });
+            break;
+
+        case "wallet" :
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.img
+            });
+            break;
+
+        case "deposit" :
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.img
+            });
+            break;
+
+        case "claimable":
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.location?.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: extractAssetImg(asset, asset.category)
+            });
+            break;
+
+        case "nft":
+            // should look into assets for NFT details
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.collectionName || asset.location?.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.collectionImg
+            });
+            break;
+
+        case "investment":
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.location?.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: extractAssetImg(asset, asset.category)
+            });
+            break;
+        
+        case "pool" :
+            let assetTokens = asset.tokens;
+            if(assetTokens && assetTokens.length > 0) {
+                for(let assetToken of assetTokens) {
+                    assetToken.img = extractAssetImg(assetToken, asset.category);
+                }
+            }
+            
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay,
+                label: asset.label || asset.symbol,
+                tokens: asset.tokens
+            });
+            break;
+
+        case "staking":
+            if(asset.type == 'base') {
+                tokens.push({
+                    address: asset.address,
+                    symbol: asset.symbol,
+                    balance: asset.balance,
+                    protocol: asset.location?.protocolDisplay || '',
+                    label: asset.label || asset.symbol,
+                    img: extractAssetImg(asset, asset.category)
+                });
+            } else if(asset.type == 'pool') {
+                let assetTokens = asset.tokens;
+                if(assetTokens && assetTokens.length > 0) {
+                    for(let assetToken of assetTokens) {
+                        assetToken.img = extractAssetImg(assetToken, asset.category);
+                    }
+                }
+
+                tokens.push({
+                    address: asset.address,
+                    symbol: asset.symbol,
+                    balance: asset.balance,
+                    protocol: asset.location?.protocolDisplay || '',
+                    label: asset.label || asset.symbol,
+                    tokens: assetTokens
+                });
+            }
+            break;
+
+        default:
+            console.log(`Asset category ${asset.category} not supported`);
+            break;
+    }
     return tokens;
 }
 
