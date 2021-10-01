@@ -39,7 +39,10 @@ export default class AddressBalances {
                     this.assetsPercentages[category] = {};
                 }
 
-                // network should be dynamic in img
+                if(this.assetsPercentages[category].hasOwnProperty(token)) {
+                    console.log('this is weird');
+                }
+
                 this.assetsPercentages[category][token] = {
                     percentage: tokenDetails.percentage == 0 ? 0 : (tokenDetails.percentage / total) * 100,
                     tokens: tokenDetails.tokens,
@@ -56,9 +59,16 @@ class TokenDetails {
     address: string;
 
     constructor(details: any) { // find more TS compliant solution
-        this.percentage = details.balance;
-        this.tokens = details.tokens;
-        this.address = details.address;
+        if(details[0]) {
+            this.percentage = details[0].balance;
+            this.tokens = details[0].tokens || [];
+            this.address = details[0].address;
+        } else {
+            //should not be used anymore
+            this.percentage = details.balance;
+            this.tokens = details.tokens;
+            this.address = details.address;
+        }
     }
 }
 

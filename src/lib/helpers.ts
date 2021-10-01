@@ -57,17 +57,148 @@ export function getEmptyAssets() {
 
 export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset) {
     let key = String(assetCategory);
-    let tokens: IToken[] = extractTokens(asset);
+    let tokens: IToken[] = extractTokens2(asset);
 
-    if(assets[key].hasOwnProperty(asset.symbol)) {
-        assets[key][asset.symbol]['balance'] += asset.balanceUSD;
+    if(assets[key].hasOwnProperty(asset.address)) {
+        for(let token of tokens) {
+            let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
+            if(foundToken) {
+                foundToken.balance += token.balance;
+            } else {
+                console.log('BIG ERROR.');
+            }
+        }
+        
+        assets[key][asset.address].balance += asset.balanceUSD;
     } else {
-        assets[key][asset.symbol] = {
-            balance: asset.balanceUSD,
-            tokens: tokens,
-            address: asset.address
-        };
+        assets[key][asset.address] = tokens;
     }
+}
+
+// improved version of extractTokens
+// refactor if any good
+export function extractTokens2(asset: IAsset): IToken[] {
+    let tokens: IToken[] = [];
+    switch(asset.category) {
+        case "debt":
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.img
+            });
+            break;
+
+        case "wallet" :
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.img
+            });
+            break;
+
+        case "deposit" :
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.img
+            });
+            break;
+
+        case "claimable":
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.location?.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: extractAssetImg(asset, asset.category)
+            });
+            break;
+
+        case "nft":
+            // should look into assets for NFT details
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.collectionName || asset.location?.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: asset.collectionImg
+            });
+            break;
+
+        case "investment":
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.location?.protocolDisplay || '',
+                label: asset.label || asset.symbol,
+                img: extractAssetImg(asset, asset.category)
+            });
+            break;
+        
+        case "pool" :
+            let assetTokens = asset.tokens;
+            if(assetTokens && assetTokens.length > 0) {
+                for(let assetToken of assetTokens) {
+                    assetToken.img = extractAssetImg(assetToken, asset.category);
+                }
+            }
+
+            tokens.push({
+                address: asset.address,
+                symbol: asset.symbol,
+                balance: asset.balanceUSD,
+                protocol: asset.protocolDisplay,
+                label: asset.label || asset.symbol,
+                tokens: asset.tokens
+            });
+            break;
+
+        case "staking":
+            if(asset.type == 'base') {
+                tokens.push({
+                    address: asset.address,
+                    symbol: asset.symbol,
+                    balance: asset.balance,
+                    protocol: asset.location?.protocolDisplay || '',
+                    label: asset.label || asset.symbol,
+                    img: extractAssetImg(asset, asset.category)
+                });
+            } else if(asset.type == 'pool') {
+                let assetTokens = asset.tokens;
+                if(assetTokens && assetTokens.length > 0) {
+                    for(let assetToken of assetTokens) {
+                        assetToken.img = extractAssetImg(assetToken, asset.category);
+                    }
+                }
+
+                tokens.push({
+                    address: asset.address,
+                    symbol: asset.symbol,
+                    balance: asset.balance,
+                    protocol: asset.location?.protocolDisplay || '',
+                    label: asset.label || asset.symbol,
+                    tokens: assetTokens
+                });
+            }
+            break;
+
+        default:
+            console.log(`Asset category ${asset.category} not supported`);
+            break;
+    }
+    return tokens;
 }
 
 // asset should be IAsset | IToken
@@ -84,7 +215,7 @@ export function extractTokens(asset: any): any {
                 delete token.reserve;
                 delete token.price;
                 delete token.balance;
-                // delete token.balanceUSD;
+                delete token.balanceUSD;
                 delete token.balanceRaw;
                 delete token.reserveRaw;
                 delete token.type;
@@ -108,7 +239,7 @@ export function extractTokens(asset: any): any {
             tokens.push({
                 address: poolAsset.address,
                 symbol: poolAsset.symbol,
-                balanceUSD: poolAsset.balanceUSD,
+                // balanceUSD: poolAsset.balanceUSD,
                 tokens: poolAssetTokens
             });
         }

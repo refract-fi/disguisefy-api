@@ -72,8 +72,14 @@ class ZapperApi {
                 for(let addressProtocol of addressesProtocol) {
                     for(let product of addressProtocol.products) {
                         for(let asset of product.assets) {
-                            // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
-                            if(asset.category == 'staked') {
+                            if(!asset.category) {
+                                if(asset.location && asset.location.type) {
+                                    asset.category = asset.location.type; // put the location type in category (some edge cases)
+                                }
+                            }
+                            
+                            if(asset.category == 'staked') { 
+                                // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
                                 asset.category = 'staking';  
                             }
 
@@ -86,16 +92,16 @@ class ZapperApi {
             }
 
             // special attention kid and needs its own dedicated route
-            [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
-            balances[AssetCategories.staking] = stakingBalance;
+            // [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
+            // balances[AssetCategories.staking] = stakingBalance;
 
-            for(let stakingToken of stakingTokens) {
-                addAsset(assets, AssetCategories.staking, stakingToken);
-            }
+            // for(let stakingToken of stakingTokens) {
+            //     addAsset(assets, AssetCategories.staking, stakingToken);
+            // }
 
-            for(let claimableToken of claimableTokens) {
-                addAsset(assets, AssetCategories.claimable, claimableToken);
-            }
+            // for(let claimableToken of claimableTokens) {
+            //     addAsset(assets, AssetCategories.claimable, claimableToken);
+            // }
 
             let addressBalances = new AddressBalances(balances, assets);
             let preset = new Preset(disguise.preset);
