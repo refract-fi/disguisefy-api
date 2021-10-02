@@ -35,14 +35,9 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
         });
 
         if(disguise && disguise.isValid()) {
-            let cachedBalances: DisguiseCache | null = await DisguiseCache.findOne({
-                where: {
-                    disguiseId: disguise.id
-                }
-            });
 
-            if(cachedBalances?.isValid()) {
-                balances = cachedBalances.data;
+            if(disguise?.isCacheValid()) {
+                balances = disguise.cache;
             } else {
                 balances = await ZapperApi.getBalances(disguise, true);
             }

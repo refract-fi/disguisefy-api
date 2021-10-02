@@ -28,6 +28,23 @@ interface DisguiseAttributes {
   preset?: number;
   permissions?: object;
   version: number;
+  provider: string;
+  status: number;
+  cache: object | null;
+  cacheGeneration: number | null;
+  cacheExpiration: number | null;
+};
+
+enum DisguiseStatus {
+  FETCHING = 0,
+  SUCCESS = 1,
+  UPDATED = 2,
+  DISGUISE_EXPIRED = 3,
+  CACHE_EXPIRED = 4,
+  ZAPPER_408_1 = 10,
+  ZAPPER_408_2 = 11,
+  ZAPPER_408_FINAL = 12,
+  ZAPPER_FAILED_CACHE_UPDATE = 13,
 };
 
 export interface DisguiseInput extends Optional<DisguiseAttributes, 'id'> {};
@@ -43,6 +60,11 @@ class Disguise extends Model<DisguiseAttributes> {
   public preset!: number;
   public permissions?: object;
   public version!: number;
+  public provider!: string;
+  public status!: number;
+  public cache?: object | null;
+  public cacheGeneration?: number | null;
+  public cacheExpiration?: number | null;
 
   static associate(models: any) {
     Disguise.hasOne(models.DisguiseCache, { foreignKey: 'disguiseId' });
@@ -50,7 +72,7 @@ class Disguise extends Model<DisguiseAttributes> {
 
   static async generate(address: string, name: string, duration: number, preset: number, cache: boolean = true) {
     let url = Disguise.generateUrl();
-    let generationTimestamp = parseInt(moment.utc().format('X'));
+    let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
 
     try {
@@ -62,13 +84,17 @@ class Disguise extends Model<DisguiseAttributes> {
         expiration: expirationTimestamp,
         preset: preset,
         permissions: {},
-        version: 1
+        version: 1,
+        provider: 'zapperfi',
+        status: DisguiseStatus.FETCHING,
+        cache: null,
+        cacheGeneration: null,
+        cacheExpiration: null
       });
 
       if(cache) {
         await Disguise.generateCache(disguise);
       }
-
       
       return disguise;
     } catch(e) {
@@ -78,23 +104,33 @@ class Disguise extends Model<DisguiseAttributes> {
   }
 
   static async saveCache(disguise: Disguise, balances: AddressBalances) {
-    await DisguiseCache.create({
-      generation: moment().format('X'),
-      expiration: moment().add(5, 'minutes').format('X'),
-      data: balances,
-      disguiseId: disguise.id
-    });
+    await disguise.update({
+        cache: balances,
+        cacheGeneration: Number(moment().format('X')),
+        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+      });
   }
 
-  static async generateCache(disguise: Disguise) { // find TS compliant solution
-    let addressBalances = await ZapperApi.getBalances(disguise, false);
+  static async generateCache(disguise: Disguise) {
+    try {
+      let addressBalances = await ZapperApi.getBalances(disguise, false);
+  
+      await disguise.update({
+        status: DisguiseStatus.SUCCESS,
+        cache: addressBalances,
+        cacheGeneration: Number(moment().format('X')),
+        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+      });
+    } catch(e) {
+      console.log(e);
 
-    await DisguiseCache.create({
-      generation: moment().format('X'),
-      expiration: moment().add(5, 'minutes').format('X'),
-      data: addressBalances,
-      disguiseId: disguise.id
-    });
+      await disguise.update({
+        status: DisguiseStatus.SUCCESS,
+        cache: null,
+        cacheGeneration: Number(moment().format('X')),
+        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+      });
+    }
   }
 
   static generateUrl(length: number = 10) {
@@ -110,6 +146,10 @@ class Disguise extends Model<DisguiseAttributes> {
 
   isValid() {
     return !moment(this.expiration, 'X').isBefore(moment());
+  }
+
+  isCacheValid() {
+    return !moment(this.cacheExpiration, 'X').isBefore(moment());
   }
 
   filter() {
@@ -159,6 +199,26 @@ Disguise.init({
   version: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  provider: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  cache: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  cacheGeneration: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  cacheExpiration: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
   sequelize: db,

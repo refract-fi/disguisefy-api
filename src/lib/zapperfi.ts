@@ -43,8 +43,8 @@ class ZapperApi {
             let uniqueProtocols = new Set();
 
             for(let network of networks) {
-                for(let protocol of network.protocols) {
-                    uniqueProtocols.add(protocol.protocol);
+                for(let app of network.apps) {
+                    uniqueProtocols.add(app.appId);
                 }
             }
 
@@ -55,7 +55,7 @@ class ZapperApi {
         }
     }
 
-    static async getBalances(disguise: Disguise, saveCache: boolean = false) {
+    static async getBalances(disguise: Disguise, saveCache: boolean = false): Promise<AddressBalances> {
         let balances = getEmptyBalances();
         let assets = getEmptyAssets();
 
@@ -122,7 +122,7 @@ class ZapperApi {
             return addressBalances;
         } catch(e) {
             console.log(`[zapperFi.getBalances]: ${e}`);
-            return e;
+            throw e;
         }
     }
 

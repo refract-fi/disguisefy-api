@@ -8,7 +8,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.addColumn('Disguises', 'dataProvider', {
+    await queryInterface.addColumn('Disguises', 'provider', {
       type: Sequelize.DataTypes.STRING,
       allowNull: false
     });
@@ -64,5 +64,9 @@ module.exports = {
         allowNull: false
       }
     });
+
+    await queryInterface.removeColumn('Disguises', 'provider');
+    await queryInterface.removeColumn('Disguises', 'status');
+    await queryInterface.removeColumn('Disguises', 'cache');
   }
 };
