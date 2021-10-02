@@ -121,7 +121,8 @@ disguiseRoutes.get('/url/:url/supportedProtocols', async ctx => {
 disguiseRoutes.post('/generate', async ctx => {
     try {
         let body = ctx.request.body;
-        let disguise = await Disguise.generate(body.address, body.name, body.duration, body.preset, true)
+        let address = String(body.address).toLowerCase()
+        let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, true)
         ctx.body = disguise;
     } catch(e) {
         ctx.status = 500;
