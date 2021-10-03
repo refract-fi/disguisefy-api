@@ -1,10 +1,25 @@
 import AddressBalances from "./addressBalances";
+import { AssetCategories } from "../lib/helpers";
 
 export default class Preset {
     presetLevel: number;
 
     constructor(presetLevel: number) {
         this.presetLevel = presetLevel;
+    }
+
+    // TS is a bitch, idgaf
+    // @ts-ignore
+    static removeNFTs(addressBalances: AddressBalances): void {
+        if(addressBalances.assets.hasOwnProperty(AssetCategories.nft)) {
+            // @ts-ignore
+            addressBalances.assets[AssetCategories.nft] = {};
+        }
+
+        if(addressBalances.balances.hasOwnProperty(AssetCategories.nft)) {
+            // @ts-ignore
+            addressBalances.balances[AssetCategories.nft] = 0;
+        }
     }
 
     // filters addressBalances in place

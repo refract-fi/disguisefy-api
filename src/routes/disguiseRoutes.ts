@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import Disguise from '../models/disguise';
+import Disguise, { DisguiseOptions } from '../models/disguise';
 import DisguiseCache from '../models/disguiseCache';
 import ZapperApi from '../lib/zapperfi';
 
@@ -121,8 +121,15 @@ disguiseRoutes.get('/url/:url/supportedProtocols', async ctx => {
 disguiseRoutes.post('/generate', async ctx => {
     try {
         let body = ctx.request.body;
-        let address = String(body.address).toLowerCase()
-        let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, true)
+        let address = String(body.address).toLowerCase();
+
+        let options: DisguiseOptions = {
+            isGroupAssetUnder: Boolean(body.isAssetGroupActive) || false,
+            groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
+            ignoreNFTs: Boolean(body.ignoreNFTs) || true
+        }
+
+        let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true)
         ctx.body = disguise;
     } catch(e) {
         ctx.status = 500;

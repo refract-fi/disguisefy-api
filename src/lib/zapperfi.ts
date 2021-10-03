@@ -110,7 +110,7 @@ class ZapperApi {
                 addToken(assets, AssetCategories.claimable, claimableToken);
             }
 
-            let addressBalances = new AddressBalances(balances, assets);
+            let addressBalances = new AddressBalances(balances, assets, disguise.options);
             let preset = new Preset(disguise.preset);
             preset.filter(addressBalances);
 

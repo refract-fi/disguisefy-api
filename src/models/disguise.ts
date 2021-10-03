@@ -12,7 +12,6 @@ import {
 import moment from 'moment';
 import DatabaseManager from '../db';
 import ZapperApi from '../lib/zapperfi';
-import DisguiseCache from './disguiseCache';
 import AddressBalances from './addressBalances';
 
 const dbManager = DatabaseManager.getInstance();
@@ -33,6 +32,13 @@ interface DisguiseAttributes {
   cache: object | null;
   cacheGeneration: number | null;
   cacheExpiration: number | null;
+  options: DisguiseOptions | null;
+};
+
+export interface DisguiseOptions {
+  isGroupAssetUnder: boolean;
+  groupAssetsUnder: number;
+  ignoreNFTs: boolean;
 };
 
 enum DisguiseStatus {
@@ -40,6 +46,7 @@ enum DisguiseStatus {
   SUCCESS = 1,
   UPDATED = 2,
   DISGUISE_EXPIRED = 3,
+  FAILED = 4,
   CACHE_EXPIRED = 4,
   ZAPPER_408_1 = 10,
   ZAPPER_408_2 = 11,
@@ -65,12 +72,13 @@ class Disguise extends Model<DisguiseAttributes> {
   public cache?: object | null;
   public cacheGeneration?: number | null;
   public cacheExpiration?: number | null;
+  public options!: DisguiseOptions | null;
 
   static associate(models: any) {
     Disguise.hasOne(models.DisguiseCache, { foreignKey: 'disguiseId' });
   }
 
-  static async generate(address: string, name: string, duration: number, preset: number, cache: boolean = true) {
+  static async generate(address: string, name: string, duration: number, preset: number, options: DisguiseOptions, cache: boolean = true) {
     let url = Disguise.generateUrl();
     let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
@@ -89,7 +97,8 @@ class Disguise extends Model<DisguiseAttributes> {
         status: DisguiseStatus.FETCHING,
         cache: null,
         cacheGeneration: null,
-        cacheExpiration: null
+        cacheExpiration: null,
+        options: options
       });
 
       if(cache) {
@@ -122,10 +131,11 @@ class Disguise extends Model<DisguiseAttributes> {
         cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
       });
     } catch(e) {
+      // TODO: do some error catching to better reflect error cause in status
       console.log(e);
-
+      
       await disguise.update({
-        status: DisguiseStatus.SUCCESS,
+        status: DisguiseStatus.FAILED,
         cache: null,
         cacheGeneration: Number(moment().format('X')),
         cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
@@ -219,7 +229,11 @@ Disguise.init({
   cacheExpiration: {
     type: DataTypes.INTEGER,
     allowNull: true
-  }
+  },
+  options: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
 }, {
   sequelize: db,
   modelName: 'Disguise',

@@ -1,4 +1,6 @@
 import IToken from "../lib/interfaces/token";
+import { DisguiseOptions } from "./disguise";
+import Preset from "./preset";
 
 export default class AddressBalances {
     balances: object; // find more TS compliant solution
@@ -6,16 +8,19 @@ export default class AddressBalances {
     assets: object; // find more TS compliant solution
     assetsPercentages: IAssetPercentages;
 
-    constructor(balances: object, assets: object) {
+    constructor(balances: object, assets: object, options: DisguiseOptions | null) {
         this.balances = balances;
         this.percentages = {};
         this.assets = assets;
         this.assetsPercentages = {};
 
-        this.calcPercentages();
+        if(options?.ignoreNFTs) {
+            Preset.removeNFTs(this);
+        }
+        this.calcPercentages(options);
     }
 
-    calcPercentages() {
+    calcPercentages(options: DisguiseOptions | null) {
         let total = Object.values(this.balances).reduce((previousValue, currentValue) => {
             let a = parseFloat(previousValue);
             let b = parseFloat(currentValue);
