@@ -36,7 +36,7 @@ interface DisguiseAttributes {
 };
 
 export interface DisguiseOptions {
-  isGroupAssetUnder: boolean;
+  isGroupAssetsUnder: boolean;
   groupAssetsUnder: number;
   ignoreNFTs: boolean;
 };

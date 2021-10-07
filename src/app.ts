@@ -25,6 +25,7 @@ class App {
 
     async start() {
         await this.dbManager.init();
+        
         this.api.use(cors({
             origin: '*'
         }));

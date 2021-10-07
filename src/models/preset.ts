@@ -22,6 +22,31 @@ export default class Preset {
         }
     }
 
+    static groupAssets(addressBalances: AddressBalances, groupAssetsUnder: number) {
+        for(let [category, assetList] of Object.entries(addressBalances.assetsPercentages)) {
+            if(Object.keys(assetList).length > 0) { // check if category has assets
+                for(let [assetAddress, assetDetails] of Object.entries(assetList)) { // assetDetails is an array of assets for some reason
+                    if(assetDetails.address != undefined) {
+                        if(assetDetails.percentage < groupAssetsUnder) {
+                            if(assetList.hasOwnProperty('groupedAssets')) {
+                                assetList['groupedAssets'].percentage += assetDetails.percentage;
+                            } else {
+                                assetList['groupedAssets'] = {
+                                    address: '',
+                                    img: 'null',
+                                    label: 'Grouped Assets',
+                                    percentage: assetDetails.percentage,
+                                    tokens: []
+                                };
+                            }
+                            delete assetList[assetAddress];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // filters addressBalances in place
     filter(addressBalances: AddressBalances) {
         switch (this.presetLevel) {

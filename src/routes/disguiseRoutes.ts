@@ -122,7 +122,7 @@ disguiseRoutes.post('/generate', async ctx => {
         let address = String(body.address).toLowerCase();
 
         let options: DisguiseOptions = {
-            isGroupAssetUnder: Boolean(body.isAssetGroupActive) || false,
+            isGroupAssetsUnder: Boolean(body.isGroupAssetsUnder) || false,
             groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
             ignoreNFTs: Boolean(body.ignoreNFTs) || false
         }
