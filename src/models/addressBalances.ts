@@ -3,12 +3,12 @@ import { DisguiseOptions } from "./disguise";
 import Preset from "./preset";
 
 export default class AddressBalances {
-    balances: object; // find more TS compliant solution
+    balances: IPercentages;
     percentages: IPercentages;
     assets: object; // find more TS compliant solution
     assetsPercentages: IAssetPercentages;
 
-    constructor(balances: object, assets: object, options: DisguiseOptions | null) {
+    constructor(balances: IPercentages, assets: object, options: DisguiseOptions | null) {
         this.balances = balances;
         this.percentages = {};
         this.assets = assets;
@@ -21,16 +21,17 @@ export default class AddressBalances {
     }
 
     calcPercentages(options: DisguiseOptions | null) {
-        let total = Object.values(this.balances).reduce((previousValue, currentValue) => {
-            let a = parseFloat(previousValue);
-            let b = parseFloat(currentValue);
+        let total: number = 0;
 
-            return isNaN(b) ? a : (a + b);
+        Object.keys(this.balances).map(key => {
+            if(key != 'debt') {
+                total += isNaN(this.balances[key]) ? 0 : this.balances[key];
+            }
         });
 
         for(let [key, value] of Object.entries(this.balances)) {
             if(key != 'undefined') {
-                this.percentages[key] = value == 0 ? 0 : (value / total) * 100;
+                this.percentages[key] = value == 0 ? 0 : (Math.abs(value) / total) * 100;
             }
         }
 
