@@ -10,6 +10,7 @@ export default interface IToken {
     img?: string;
     reserveRaw?: string;
     type?: string;
+    metaType?: string;
     decimals?: number;
     protocol?: string;
     label?: string;

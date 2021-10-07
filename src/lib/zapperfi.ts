@@ -79,10 +79,12 @@ class ZapperApi {
                             if(!asset.category) {
                                 if(asset.location && asset.location.type) {
                                     asset.category = asset.location.type; // put the location type in category (some edge cases)
+                                } else if(asset.type) {
+                                    asset.category = asset.type;
                                 }
                             }
                             
-                            if(asset.category == 'staked') { 
+                            if(asset.category == 'staked' || asset.category == 'farm') { 
                                 // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
                                 asset.category = 'staking';  
                             }
@@ -91,25 +93,29 @@ class ZapperApi {
                                 // do not add this is pool as we will likely receive it from staking-balances
                             } else {
                                 let assetCategory: AssetCategories = getAssetCategories(asset.category);
-                                balances[assetCategory] += asset.balanceUSD;
-                                addAsset(assets, assetCategory, asset);
+                                if(asset.hide) {
+                                    // do nothing
+                                } else {
+                                    addAsset(assets, assetCategory, asset, balances);
+                                }
                             }
                         }
                     }
                 }
             }
 
+            // seems not needed anymore since feractor on 07/10/2021 from zapper
             // special attention kid and needs its own dedicated route
-            [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
-            balances[AssetCategories.staking] = stakingBalance;
+            // [stakingBalance, stakingTokens, claimableTokens] = await ZapperApi.getStakingBalances(disguise);
+            // balances[AssetCategories.staking] = stakingBalance;
 
-            for(let stakingToken of stakingTokens) {
-                addToken(assets, AssetCategories.staking, stakingToken);
-            }
+            // for(let stakingToken of stakingTokens) {
+            //     addToken(assets, AssetCategories.staking, stakingToken);
+            // }
 
-            for(let claimableToken of claimableTokens) {
-                addToken(assets, AssetCategories.claimable, claimableToken);
-            }
+            // for(let claimableToken of claimableTokens) {
+            //     addToken(assets, AssetCategories.claimable, claimableToken);
+            // }
 
             let addressBalances = new AddressBalances(balances, assets, disguise.options);
             let preset = new Preset(disguise.preset);

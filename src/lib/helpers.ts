@@ -1,3 +1,4 @@
+import { symbolName } from "typescript";
 import IAsset from "./interfaces/asset";
 import IToken from "./interfaces/token";
 
@@ -55,7 +56,7 @@ export function getEmptyAssets() {
     return Object.assign({}, JSON.parse(emptyAssets));
 }
 
-export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset) {
+export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any) {
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset);
 
@@ -64,12 +65,34 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
             if(foundToken) {
                 foundToken.balance += token.balance;
+                balances[key] += token.balance;
+
+                console.log('[addAsset]: looks weird 1');
+            } else {
+                console.log('[addAsset]: should not happen.');
             }
         }
         
         assets[key][asset.address].balance += asset.balanceUSD;
+        console.log('[addAsset]: looks weird 2');
     } else {
-        assets[key][asset.address] = tokens;
+        // zapper introduced a new "farm" asset type, which they confirmed is not in their final form
+        // wait until it is final before clean rewrite
+        if(asset.type == 'farm' && asset.tokens && asset.tokens.length > 0) {
+            for(let token of asset.tokens) {
+                token.balance = token.balanceUSD; // for calculations later on we use "balance" field
+                if(token.metaType == 'staking' || token.metaType == 'staked') {
+                    assets['staking'][token.address] = [token];
+                    balances['staking'] += token.balance;
+                } else if(token.metaType == 'claimable' || token.metaType == 'yield') {
+                    assets['claimable'][token.address] = [token];
+                    balances['claimable'] += token.balance;
+                }
+            }
+        } else {
+            assets[key][asset.address] = tokens;
+            balances[key] += asset.balanceUSD;
+        }
     }
 }
 
@@ -176,7 +199,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 tokens.push({
                     address: asset.address,
                     symbol: asset.symbol,
-                    balance: asset.balance,
+                    balance: asset.balanceUSD,
                     protocol: asset.location?.protocolDisplay || '',
                     label: asset.label || asset.symbol,
                     img: extractAssetImg(asset, asset.category)
@@ -192,9 +215,33 @@ export function extractTokens(asset: IAsset): IToken[] {
                 tokens.push({
                     address: asset.address,
                     symbol: asset.symbol,
-                    balance: asset.balance,
+                    balance: asset.balanceUSD,
                     protocol: asset.location?.protocolDisplay || '',
                     label: asset.label || asset.symbol,
+                    tokens: assetTokens
+                });
+            } else if(asset.type == 'farm') {
+                let assetTokens = asset.tokens;
+                let symbol = '';
+
+                if(asset.symbol) {
+                    symbol = asset.symbol
+                } else if(assetTokens && assetTokens.length > 0) {
+                    symbol = assetTokens[0].symbol;
+                }
+
+                if(assetTokens && assetTokens.length > 0) {
+                    for(let assetToken of assetTokens) {
+                        assetToken.img = extractAssetImg(assetToken, asset.category);
+                    }
+                }
+
+                tokens.push({
+                    address: asset.address,
+                    symbol: symbol,
+                    balance: asset.balanceUSD,
+                    protocol: asset.protocolDisplay || asset.location?.protocolDisplay || '',
+                    label: asset.label || asset.symbol || symbol,
                     tokens: assetTokens
                 });
             }
