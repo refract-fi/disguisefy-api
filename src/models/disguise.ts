@@ -130,16 +130,23 @@ class Disguise extends Model<DisguiseAttributes> {
         cacheGeneration: Number(moment().format('X')),
         cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
       });
-    } catch(e) {
-      // TODO: do some error catching to better reflect error cause in status
-      console.log(e);
+    } catch(e: any) {
+      let status: DisguiseStatus;
+
+      if(e.response?.status == 408) {
+        status = DisguiseStatus.ZAPPER_408_1;
+      } else {
+        status = DisguiseStatus.FAILED;
+      }
       
       await disguise.update({
-        status: DisguiseStatus.FAILED,
+        status: status,
         cache: null,
         cacheGeneration: Number(moment().format('X')),
         cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
       });
+
+      throw e;
     }
   }
 
@@ -159,7 +166,7 @@ class Disguise extends Model<DisguiseAttributes> {
   }
 
   isCacheValid() {
-    return !moment(this.cacheExpiration, 'X').isBefore(moment());
+    return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
   }
 
   filter() {

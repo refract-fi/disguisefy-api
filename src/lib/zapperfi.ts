@@ -26,6 +26,7 @@ const SUPPORTED_STAKING_PROTOCOLS = ['masterchef', 'gauge', 'single-staking'];
 class ZapperApi {
     private static apiKey?: string = process.env.ZAPPERFI_API_KEY;
     private static apiUrl: string = `https://api.zapper.fi/v1`;
+    // private static apiUrl: string = `http://localhost:3408`;
 
     constructor() {
 
@@ -36,6 +37,7 @@ class ZapperApi {
         params.append('addresses[]', disguise.address);
         params.append('api_key', ZapperApi.apiKey || '');
         const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString(); 
+        // const url = `${ZapperApi.apiUrl}/users/408?` + params.toString(); 
 
         try {
             let response = await axios.get(url);
@@ -50,8 +52,7 @@ class ZapperApi {
 
             return Array.from(uniqueProtocols);
         } catch(e) {
-            console.log(`[zapperFi.getSupportedProtocoals]: ${e}`);
-            return e;
+            throw e
         }
     }
 

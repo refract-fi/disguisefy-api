@@ -35,7 +35,6 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
         });
 
         if(disguise && disguise.isValid()) {
-
             if(disguise?.isCacheValid()) {
                 balances = disguise.cache;
             } else {
@@ -49,9 +48,8 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
         }
 
         ctx.body = balances;
-    } catch(e) {
-        console.log(e);
-        ctx.status = 404;
+    } catch(e: any) {
+        ctx.status = e.response.status;
         ctx.body = e;
     } 
 });
