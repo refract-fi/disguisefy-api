@@ -6,8 +6,9 @@ import Router from 'koa-router';
 import logger from 'koa-logger';
 import json from 'koa-json';
 import bodyParser from 'koa-bodyparser';
-import koaApikey from './koaApikey';
+import cors from 'koa-cors';
 
+import koaApikey from './koaApikey';
 import DatabaseManager from './db';
 import disguiseRoutes from './routes/disguiseRoutes';
 
@@ -24,6 +25,9 @@ class App {
 
     async start() {
         await this.dbManager.init();
+        this.api.use(cors({
+            origin: false
+        }));
         this.api.use(json());
         this.api.use(logger());
         this.api.use(bodyParser());

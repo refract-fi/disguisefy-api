@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@types/koa-bodyparser": "^4.3.3",
+    "@types/koa-cors": "^0.0.2",
     "@types/node": "^16.9.1",
     "@types/uuid": "^8.3.1",
     "@types/validator": "^13.6.3",
@@ -26,6 +27,7 @@
     "koa": "^2.13.1",
     "koa-apikey": "^0.1.1",
     "koa-bodyparser": "^4.3.0",
+    "koa-cors": "^0.0.16",
     "koa-json": "^2.0.2",
     "koa-logger": "^3.2.1",
     "koa-router": "^10.1.1",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@types/koa": "^2.13.4",
+    "@types/koa-cors": "^0.0.2",
     "@types/koa-json": "^2.0.20",
     "@types/koa-logger": "^3.1.1",
     "@types/koa-router": "^7.4.4",
