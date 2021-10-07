@@ -130,6 +130,7 @@ class Disguise extends Model<DisguiseAttributes> {
         cacheGeneration: Number(moment().format('X')),
         cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
       });
+      
     } catch(e: any) {
       let status: DisguiseStatus;
 
