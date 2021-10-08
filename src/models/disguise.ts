@@ -3,7 +3,7 @@ import {
   Model,
   DataTypes,
   Optional } from 'sequelize';
-  
+
 import moment from 'moment';
 import DatabaseManager from '../db';
 import ZapperApi from '../lib/zapperfi';
@@ -45,11 +45,13 @@ enum DisguiseStatus {
   UPDATED = 2,
   DISGUISE_EXPIRED = 3,
   FAILED = 4,
-  CACHE_EXPIRED = 4,
+  CACHE_EXPIRED = 5,
+  IPFS_SAVING = 6,
   ZAPPER_408_1 = 10,
   ZAPPER_408_2 = 11,
   ZAPPER_408_FINAL = 12,
   ZAPPER_FAILED_CACHE_UPDATE = 13,
+  IPFS_FAILED = 20
 };
 
 export interface DisguiseInput extends Optional<DisguiseAttributes, 'id'> {};
@@ -80,7 +82,7 @@ class Disguise extends Model<DisguiseAttributes> {
     let cid;
 
     try {
-      disguise = await Disguise.create({
+      disguise = Disguise.build({
         address: address,
         url: url, 
         name: name,
@@ -100,15 +102,27 @@ class Disguise extends Model<DisguiseAttributes> {
       if(cache) {
         addressBalances = await Disguise.generateCache(disguise);
 
-        await disguise.update({
-          status: DisguiseStatus.SUCCESS,
-          cache: addressBalances,
-          cacheGeneration: Number(moment().format('X')),
-          cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
-        });
-
         if(disguise.options?.useIPFS) {
-          cid = await web3.store(disguise.toJSON(), disguise.url);
+          disguise.set({
+            status: DisguiseStatus.IPFS_SAVING,
+            cache: addressBalances,
+          });
+          
+          let ipfsSuccess = await web3.addRecord(disguise);
+
+          // entry will only be saved if IPFS failed, if not it wont be saved
+          if(!ipfsSuccess) {
+            disguise.update({
+              status: DisguiseStatus.IPFS_FAILED
+            });
+          }
+        } else {
+          await disguise.update({
+            status: DisguiseStatus.SUCCESS,
+            cache: addressBalances,
+            cacheGeneration: Number(moment().format('X')),
+            cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+          });
         }
       }
       
@@ -173,6 +187,14 @@ class Disguise extends Model<DisguiseAttributes> {
       expiration: this.expiration, 
       preset: this.preset
     };
+  }
+
+  static prepareIPFS(disguiseData: any) {
+    delete disguiseData.id;
+    delete disguiseData.address;
+    delete disguiseData.permissions;
+    delete disguiseData.cacheGeneration;
+    delete disguiseData.cacheExpiration;
   }
 };
 

@@ -4,18 +4,36 @@ import DatabaseManager from '../db';
 const dbManager = DatabaseManager.getInstance();
 const db = dbManager.getSequelize();
 
-const refCIDKey = 'ref_cid';
-
 interface AppSettingsAttributes {
     id: number;
-    name?: string;
+    name: string;
     value?: string;
 }
 
 class AppSettings extends Model<AppSettingsAttributes> {
     public id?: number;
-    public name?: string | null;
-    public value?: string | null;
+    public name!: string;
+    public value!: string;
+    public static REF_CID_KEY = 'ref_cid';
+
+    static async getCID(): Promise<string> {
+        try {
+            let appSetting = await AppSettings.findOne({
+                where: {
+                    name: AppSettings.REF_CID_KEY
+                }
+            });
+
+            if(appSetting) {
+                return appSetting.value;
+            } else {
+                throw new Error('No appSetting for ref_cid');
+            }
+        } catch(e) {
+            console.log(e);
+            return '';
+        }
+    }
 };
 
 AppSettings.init({

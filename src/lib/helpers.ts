@@ -56,6 +56,14 @@ export function getEmptyAssets() {
     return Object.assign({}, JSON.parse(emptyAssets));
 }
 
+export function isJSON(text: any) {
+    if (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any) {
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset);
