@@ -15,7 +15,6 @@ import {
     getAssetCategories,
     addAsset,
     addToken,
-    extractTokens,
     extractAssetImg
 } from './helpers';
 
@@ -61,9 +60,9 @@ class ZapperApi {
         let assets = getEmptyAssets();
 
         try {
-            let stakingBalance: number;
-            let stakingTokens: IToken[];
-            let claimableTokens: IToken[];
+            // let stakingBalance: number;
+            // let stakingTokens: IToken[];
+            // let claimableTokens: IToken[];
 
             let uniqueProtocols: any = await ZapperApi.getSupportedProtocols(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
             let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueProtocols);

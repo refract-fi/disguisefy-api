@@ -11,23 +11,23 @@ const disguiseRoutes = new Router({
     prefix: '/disguises'
 });
 
-disguiseRoutes.get('/:id/balances', async ctx => {
-    try {
-        let balances;
-        let disguise = await Disguise.findByPk(ctx.params.id);
+// disguiseRoutes.get('/:id/balances', async ctx => {
+//     try {
+//         let balances;
+//         let disguise = await Disguise.findByPk(ctx.params.id);
 
-        if(disguise && disguise.isValid()) {
-            balances = await ZapperApi.getBalances(disguise, false);
-        } else {
-            ctx.throw(404, `No disguise found.`)
-        }
+//         if(disguise && disguise.isValid()) {
+//             balances = await ZapperApi.getBalances(disguise, false);
+//         } else {
+//             ctx.throw(404, `No disguise found.`)
+//         }
 
-        ctx.body = balances;
-    } catch(e) {
-        ctx.status = 404;
-        ctx.body = e;
-    } 
-});
+//         ctx.body = balances;
+//     } catch(e) {
+//         ctx.status = 404;
+//         ctx.body = e;
+//     } 
+// });
 
 disguiseRoutes.get('/url/:url/balances', async ctx => {
     try {
@@ -68,67 +68,67 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
     } 
 });
 
-disguiseRoutes.get('/url/:url/balances/staking', async ctx => {
-    try {
-        let stakingBalance;
-        let disguise = await Disguise.findOne({
-            where: {
-                url: ctx.params.url
-            }
-        });
+// disguiseRoutes.get('/url/:url/balances/staking', async ctx => {
+//     try {
+//         let stakingBalance;
+//         let disguise = await Disguise.findOne({
+//             where: {
+//                 url: ctx.params.url
+//             }
+//         });
 
-        if(disguise && disguise.isValid()) {
-            stakingBalance = await ZapperApi.getStakingBalances(disguise);
-        } else {
-            ctx.throw(404, `No disguise found.`)
-        }
+//         if(disguise && disguise.isValid()) {
+//             stakingBalance = await ZapperApi.getStakingBalances(disguise);
+//         } else {
+//             ctx.throw(404, `No disguise found.`)
+//         }
 
-        ctx.body = stakingBalance;
-    } catch(e) {
-        ctx.status = 404;
-        ctx.body = e;
-    } 
-});
+//         ctx.body = stakingBalance;
+//     } catch(e) {
+//         ctx.status = 404;
+//         ctx.body = e;
+//     } 
+// });
 
-disguiseRoutes.get('/:id/supportedProtocols', async ctx => {
-    try {
-        let supportedProtocols;
-        let disguise = await Disguise.findByPk(ctx.params.id);
+// disguiseRoutes.get('/:id/supportedProtocols', async ctx => {
+//     try {
+//         let supportedProtocols;
+//         let disguise = await Disguise.findByPk(ctx.params.id);
 
-        if(disguise && disguise.isValid()) {
-            supportedProtocols = await ZapperApi.getSupportedProtocols(disguise);
-        } else {
-            ctx.throw(404, `No disguise found.`)
-        }
+//         if(disguise && disguise.isValid()) {
+//             supportedProtocols = await ZapperApi.getSupportedProtocols(disguise);
+//         } else {
+//             ctx.throw(404, `No disguise found.`)
+//         }
 
-        ctx.body = supportedProtocols;
-    } catch(e) {
-        ctx.status = 404;
-        ctx.body = e;
-    } 
-});
+//         ctx.body = supportedProtocols;
+//     } catch(e) {
+//         ctx.status = 404;
+//         ctx.body = e;
+//     } 
+// });
 
-disguiseRoutes.get('/url/:url/supportedProtocols', async ctx => {
-    try {
-        let supportedProtocols;
-        let disguise = await Disguise.findOne({
-            where: {
-                url: ctx.params.url
-            }
-        });
+// disguiseRoutes.get('/url/:url/supportedProtocols', async ctx => {
+//     try {
+//         let supportedProtocols;
+//         let disguise = await Disguise.findOne({
+//             where: {
+//                 url: ctx.params.url
+//             }
+//         });
 
-        if(disguise && disguise.isValid()) {
-            supportedProtocols = await ZapperApi.getSupportedProtocols(disguise);
-        } else {
-            ctx.throw(404, `No disguise found.`)
-        }
+//         if(disguise && disguise.isValid()) {
+//             supportedProtocols = await ZapperApi.getSupportedProtocols(disguise);
+//         } else {
+//             ctx.throw(404, `No disguise found.`)
+//         }
 
-        ctx.body = supportedProtocols;
-    } catch(e) {
-        ctx.status = 404;
-        ctx.body = e;
-    } 
-});
+//         ctx.body = supportedProtocols;
+//     } catch(e) {
+//         ctx.status = 404;
+//         ctx.body = e;
+//     } 
+// });
 
 disguiseRoutes.post('/generate', async ctx => {
     try {
@@ -151,59 +151,38 @@ disguiseRoutes.post('/generate', async ctx => {
     }
 });
 
-disguiseRoutes.get('/store', async ctx => {
-    await web3.listFiles(cid);
-    ctx.body = 'true';
-});
+// disguiseRoutes.get('/:id', async ctx => {
+//     try {
+//         let disguise: Disguise | null = await Disguise.findByPk(ctx.params.id);
 
-disguiseRoutes.get('/all', async ctx => {
-    let disguises = await Disguise.findAll();
-    ctx.body = disguises;
-});
+//         if(!disguise || !disguise.isValid()) {
+//             ctx.throw(404, `No disguise found for ${ctx.params.id}`);
+//         }
 
-disguiseRoutes.get('/:id', async ctx => {
-    try {
-        let disguise: Disguise | null = await Disguise.findByPk(ctx.params.id);
+//         ctx.body = disguise;
+//     } catch(e) {
+//         ctx.status = 404;
+//         ctx.body = e;
+//     }
+// });
 
-        if(!disguise || !disguise.isValid()) {
-            ctx.throw(404, `No disguise found for ${ctx.params.id}`);
-        }
+// // working on sequelize association: SequelizeEagerLoadingError
+// disguiseRoutes.get('/:id/cache', async ctx => {
+//     try {
+//         let disguise = await Disguise.findByPk(ctx.params.id, {
+//             include: [{
+//                 model: DisguiseCache, required: false
+//             }]
+//         });
+//         if(!disguise || !disguise.isValid()) {
+//             ctx.throw(404, `No disguise found for ${ctx.params.id}`);
+//         }
 
-        ctx.body = disguise;
-    } catch(e) {
-        ctx.status = 404;
-        ctx.body = e;
-    }
-});
-
-// working on sequelize association: SequelizeEagerLoadingError
-disguiseRoutes.get('/:id/cache', async ctx => {
-    try {
-        let disguise = await Disguise.findByPk(ctx.params.id, {
-            include: [{
-                model: DisguiseCache, required: false
-            }]
-        });
-        if(!disguise || !disguise.isValid()) {
-            ctx.throw(404, `No disguise found for ${ctx.params.id}`);
-        }
-
-        ctx.body = disguise;
-    } catch(e) {
-        ctx.status = 404;
-        ctx.body = e;
-    }
-});
-
-disguiseRoutes.post('/', async ctx => {
-    let body = ctx.request.body;
-    try {
-        let disguise = await Disguise.create(body);
-        ctx.body = disguise;
-    } catch(e) {
-        console.log(e);
-        ctx.throw(500, `Could not create disguise.`);
-    }
-});
+//         ctx.body = disguise;
+//     } catch(e) {
+//         ctx.status = 404;
+//         ctx.body = e;
+//     }
+// });
 
 export default disguiseRoutes;

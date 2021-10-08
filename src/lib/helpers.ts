@@ -86,13 +86,15 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
     } else {
         // zapper introduced a new "farm" asset type, which they confirmed is not in their final form
         // wait until it is final before clean rewrite
-        if(asset.type == 'farm' && asset.tokens && asset.tokens.length > 0) {
-            for(let token of asset.tokens) {
-                token.balance = token.balanceUSD; // for calculations later on we use "balance" field
+        if((asset.type == 'farm' || asset.type == 'claimable') && asset.tokens && asset.tokens.length > 0) {
+            for(let token of tokens) {
                 if(token.metaType == 'staking' || token.metaType == 'staked') {
                     assets['staking'][token.address] = [token];
                     balances['staking'] += token.balance;
                 } else if(token.metaType == 'claimable' || token.metaType == 'yield') {
+                    assets['claimable'][token.address] = [token];
+                    balances['claimable'] += token.balance;
+                } else {
                     assets['claimable'][token.address] = [token];
                     balances['claimable'] += token.balance;
                 }
@@ -151,14 +153,20 @@ export function extractTokens(asset: IAsset): IToken[] {
             break;
 
         case "claimable":
-            tokens.push({
-                address: asset.address,
-                symbol: asset.symbol,
-                balance: asset.balanceUSD,
-                protocol: asset.location?.protocolDisplay || '',
-                label: asset.label || asset.symbol,
-                img: extractAssetImg(asset, asset.category)
-            });
+            let claimableAssetTokens = asset.tokens;
+            if(claimableAssetTokens && claimableAssetTokens.length > 0) {
+                for(let assetToken of claimableAssetTokens) {
+                    assetToken.img = extractAssetImg(assetToken, asset.category);
+                    tokens.push({
+                        address: assetToken.address,
+                        symbol: assetToken.symbol,
+                        balance: assetToken.balanceUSD,
+                        protocol: asset.protocolDisplay || '',
+                        label: assetToken.label || assetToken.symbol,
+                        img: assetToken.img
+                    });
+                }
+            }
             break;
 
         case "nft":
@@ -185,9 +193,9 @@ export function extractTokens(asset: IAsset): IToken[] {
             break;
         
         case "pool" :
-            let assetTokens = asset.tokens;
-            if(assetTokens && assetTokens.length > 0) {
-                for(let assetToken of assetTokens) {
+            let poolAssetTokens = asset.tokens;
+            if(poolAssetTokens && poolAssetTokens.length > 0) {
+                for(let assetToken of poolAssetTokens) {
                     assetToken.img = extractAssetImg(assetToken, asset.category);
                 }
             }
@@ -241,17 +249,19 @@ export function extractTokens(asset: IAsset): IToken[] {
                 if(assetTokens && assetTokens.length > 0) {
                     for(let assetToken of assetTokens) {
                         assetToken.img = extractAssetImg(assetToken, asset.category);
+                        assetToken.protocol = asset.protocolDisplay;
+
+                        tokens.push({
+                            address: assetToken.address,
+                            symbol: assetToken.symbol,
+                            metaType: assetToken.metaType,
+                            balance: assetToken.balanceUSD,
+                            protocol: asset.protocolDisplay || asset.location?.protocolDisplay || '',
+                            label: assetToken.label || assetToken.symbol || symbol,
+                            img: assetToken.img
+                        });
                     }
                 }
-
-                tokens.push({
-                    address: asset.address,
-                    symbol: symbol,
-                    balance: asset.balanceUSD,
-                    protocol: asset.protocolDisplay || asset.location?.protocolDisplay || '',
-                    label: asset.label || asset.symbol || symbol,
-                    tokens: assetTokens
-                });
             }
             break;
 

@@ -116,7 +116,6 @@ class Disguise extends Model<DisguiseAttributes> {
             });
           }
         } else {
-          console.log(disguise.toJSON());
           disguise.set({
             status: DisguiseStatus.SUCCESS,
             cache: addressBalances,
@@ -179,7 +178,8 @@ class Disguise extends Model<DisguiseAttributes> {
   }
 
   isCacheValid() {
-    return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
+    return false; // for dev only!!
+    // return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
   }
 
   filter() {
