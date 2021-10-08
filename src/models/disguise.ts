@@ -79,7 +79,6 @@ class Disguise extends Model<DisguiseAttributes> {
     let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
     let addressBalances, disguise;
-    let cid;
 
     try {
       disguise = Disguise.build({
@@ -117,12 +116,15 @@ class Disguise extends Model<DisguiseAttributes> {
             });
           }
         } else {
-          await disguise.update({
+          console.log(disguise.toJSON());
+          disguise.set({
             status: DisguiseStatus.SUCCESS,
             cache: addressBalances,
             cacheGeneration: Number(moment().format('X')),
             cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
           });
+
+          await disguise.save();
         }
       }
       
@@ -238,7 +240,8 @@ Disguise.init({
   },
   provider: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: true,
+    defaultValue: null
   },
   status: {
     type: DataTypes.INTEGER,
@@ -268,7 +271,7 @@ Disguise.init({
 });
 
 Disguise.addHook('afterFind', async (disguise: Disguise) => {
-  if(moment(disguise.expiration, 'X').isBefore(moment())) {
+  if(disguise && moment(disguise.expiration, 'X').isBefore(moment())) {
     console.log(`Disguise with id ${disguise.id} is expired: cya!`);
     await disguise.destroy();
   }

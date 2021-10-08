@@ -71,9 +71,58 @@ class Web3Api {
             
             return true;
         } catch(e) {
-            // error handling
             console.log(e);
             return false;
+        }
+    }
+
+    async findRecord(url: string) {
+        let refLink = await AppSettings.getCID();
+        let refCidResponse = await got(`https://${refLink}.ipfs.dweb.link/ref`);
+        let refCidBody = refCidResponse.body;
+        let refCid: any;
+        let disguise: Disguise;
+        let found = false;
+        
+        if(isJSON(refCidBody)) {
+            refCid = JSON.parse(refCidBody);
+        } else {
+            throw new Error("RefCid is not a valid JSON.");
+        }
+
+        for(let ipfsUrl of Object.keys(refCid)) {
+            if(ipfsUrl == url) {
+                found = true;
+                let foundDisguise = refCid[ipfsUrl];
+                let ipfsDisguiseUrl = `https://${refCid[ipfsUrl].cid}.ipfs.dweb.link/${ipfsUrl}`;
+                let ipfsDisguiseResponse = await got(ipfsDisguiseUrl);
+                let ipfsDisguisebody = ipfsDisguiseResponse.body;
+                let ipfsDisguise;
+
+                if(isJSON(ipfsDisguisebody)) {
+                    ipfsDisguise = JSON.parse(ipfsDisguisebody);
+                } else {
+                    throw new Error(`Disguise at ${ipfsDisguiseUrl} is not a valid JSON.`);
+                }
+
+                disguise = Disguise.build({
+                    address: '',
+                    url: ipfsDisguise.url,
+                    name: ipfsDisguise.name,
+                    generation: ipfsDisguise.generation,
+                    expiration: ipfsDisguise.expiration,
+                    preset: ipfsDisguise.preset,
+                    version: ipfsDisguise.version,
+                    provider: ipfsDisguise.provider,
+                    status: ipfsDisguise.status,
+                    cache: ipfsDisguise.cache,
+                    options: ipfsDisguise.options,
+                    cacheExpiration: null,
+                    cacheGeneration: null
+                });
+
+                return disguise.isValid() ? disguise : null;
+            }
         }
     }
 }

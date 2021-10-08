@@ -32,9 +32,10 @@ disguiseRoutes.get('/:id/balances', async ctx => {
 disguiseRoutes.get('/url/:url/balances', async ctx => {
     try {
         let balances: any; // find more TS compliant solution
+        let url = ctx.params.url;
         let disguise: Disguise | null = await Disguise.findOne({
             where: {
-                url: ctx.params.url
+                url: url
             }
         });
 
@@ -47,13 +48,22 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
 
             balances.disguise = disguise.filter();
         } else {
-            console.log('error');
-            ctx.throw(404, `No disguise found.`)
+            // check on IPFS
+            let ipfsDisguise = await web3.findRecord(url);
+
+            if(ipfsDisguise) {
+                balances = ipfsDisguise.cache;
+                balances.disguise = ipfsDisguise.filter();
+            } else {
+                console.log('error');
+                ctx.throw(404, `No disguise found.`)
+            }
         }
 
         ctx.body = balances;
     } catch(e: any) {
-        ctx.status = e.response.status;
+        console.log(e);
+        ctx.status = e.response?.status || 500;
         ctx.body = e;
     } 
 });
@@ -129,7 +139,7 @@ disguiseRoutes.post('/generate', async ctx => {
             isGroupAssetsUnder: Boolean(body.isGroupAssetsUnder) || false,
             groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
             ignoreNFTs: Boolean(body.ignoreNFTs) || false,
-            useIPFS: Boolean(body.useIPFS) || true
+            useIPFS: Boolean(body.isSnapshot) || false
         }
 
         let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true);
