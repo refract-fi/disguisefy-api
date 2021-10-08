@@ -9,6 +9,7 @@ declare global {
             DB_PORT: string;
             ZAPPERFI_API_KEY: string;
             REST_API_KEYS: string;
+            WEB3_TOKEN: string;
         }
     }
 }

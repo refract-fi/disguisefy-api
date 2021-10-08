@@ -186,19 +186,6 @@ class ZapperApi {
                             label: staking.label || staking.symbol,
                             tokens: assetTokens
                         });
-                        // we most likely want the pool asset
-                        // if(staking.tokens) {
-                        //     for(let stakingToken of staking.tokens) {
-                        //         stakingTokens.push({
-                        //             address: stakingToken.address,
-                        //             symbol: stakingToken.symbol,
-                        //             balance: stakingToken.balanceUSD,
-                        //             protocol: stakingToken.protocolDisplay || '',
-                        //             label: stakingToken.label || stakingToken.symbol,
-                        //             img: extractAssetImg(stakingToken, 'base')
-                        //         });
-                        //     }
-                        // }
                     }
                 }
             }

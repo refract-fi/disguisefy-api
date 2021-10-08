@@ -124,12 +124,14 @@ disguiseRoutes.post('/generate', async ctx => {
         let options: DisguiseOptions = {
             isGroupAssetsUnder: Boolean(body.isGroupAssetsUnder) || false,
             groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
-            ignoreNFTs: Boolean(body.ignoreNFTs) || false
+            ignoreNFTs: Boolean(body.ignoreNFTs) || false,
+            useIPFS: Boolean(body.useIPFS) || true
         }
 
         let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true)
         ctx.body = disguise;
     } catch(e) {
+        console.log(e);
         ctx.status = 500;
         ctx.body = e;
     }

@@ -39,6 +39,7 @@ export interface DisguiseOptions {
   isGroupAssetsUnder: boolean;
   groupAssetsUnder: number;
   ignoreNFTs: boolean;
+  useIPFS: boolean;
 };
 
 enum DisguiseStatus {
@@ -82,9 +83,10 @@ class Disguise extends Model<DisguiseAttributes> {
     let url = Disguise.generateUrl();
     let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
+    let addressBalances, disguise;
 
     try {
-      let disguise = await Disguise.create({
+      disguise = await Disguise.create({
         address: address,
         url: url, 
         name: name,
@@ -102,13 +104,36 @@ class Disguise extends Model<DisguiseAttributes> {
       });
 
       if(cache) {
-        await Disguise.generateCache(disguise);
+        addressBalances = await Disguise.generateCache(disguise);
+
+        await disguise.update({
+          status: DisguiseStatus.SUCCESS,
+          cache: addressBalances,
+          cacheGeneration: Number(moment().format('X')),
+          cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+        });
       }
       
       return disguise;
-    } catch(e) {
+    } catch(e: any) {
+
+      let status: DisguiseStatus;
+
+      if(e.response?.status == 408) {
+        status = DisguiseStatus.ZAPPER_408_1;
+      } else {
+        status = DisguiseStatus.FAILED;
+      }
+
+      await disguise?.update({
+        status: status,
+        cache: null,
+        cacheGeneration: Number(moment().format('X')),
+        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+      });
+
       console.log(`Could not generate disguise for address: ${address}, name: ${name}, duration: ${duration}, preset: ${preset}`);
-      return e;
+      return disguise;
     }
   }
 
@@ -123,30 +148,9 @@ class Disguise extends Model<DisguiseAttributes> {
   static async generateCache(disguise: Disguise) {
     try {
       let addressBalances = await ZapperApi.getBalances(disguise, false);
-  
-      await disguise.update({
-        status: DisguiseStatus.SUCCESS,
-        cache: addressBalances,
-        cacheGeneration: Number(moment().format('X')),
-        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
-      });
-      
-    } catch(e: any) {
-      let status: DisguiseStatus;
 
-      if(e.response?.status == 408) {
-        status = DisguiseStatus.ZAPPER_408_1;
-      } else {
-        status = DisguiseStatus.FAILED;
-      }
-      
-      await disguise.update({
-        status: status,
-        cache: null,
-        cacheGeneration: Number(moment().format('X')),
-        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
-      });
-
+      return addressBalances;    
+    } catch(e) {
       throw e;
     }
   }
