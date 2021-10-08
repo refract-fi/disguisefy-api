@@ -36,7 +36,7 @@ export interface DisguiseOptions {
   isGroupAssetsUnder: boolean;
   groupAssetsUnder: number;
   ignoreNFTs: boolean;
-  useIPFS: boolean;
+  isSnapshot: boolean;
 };
 
 enum DisguiseStatus {
@@ -101,7 +101,7 @@ class Disguise extends Model<DisguiseAttributes> {
       if(cache) {
         addressBalances = await Disguise.generateCache(disguise);
 
-        if(disguise.options?.useIPFS) {
+        if(disguise.options?.isSnapshot) {
           disguise.set({
             status: DisguiseStatus.IPFS_SAVING,
             cache: addressBalances,
@@ -186,8 +186,12 @@ class Disguise extends Model<DisguiseAttributes> {
     return {
       url: this.url,
       name: this.name,
-      expiration: this.expiration, 
-      preset: this.preset
+      expiration: this.expiration,
+      generation: this.generation,
+      preset: this.preset,
+      options: {
+        isSnapshot: this.options?.isSnapshot
+      }
     };
   }
 
