@@ -143,7 +143,8 @@ disguiseRoutes.post('/generate', async ctx => {
         }
 
         let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true);
-        ctx.body = disguise;
+
+        ctx.body = disguise?.filter();
     } catch(e) {
         console.log(e);
         ctx.status = 500;
