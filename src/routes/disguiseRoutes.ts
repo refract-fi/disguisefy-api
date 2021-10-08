@@ -2,6 +2,10 @@ import Router from 'koa-router';
 import Disguise, { DisguiseOptions } from '../models/disguise';
 import DisguiseCache from '../models/disguiseCache';
 import ZapperApi from '../lib/zapperfi';
+import Web3Api from '../lib/web3';
+
+const web3 = new Web3Api();
+const cid = process.env.WEB3_CID;
 
 const disguiseRoutes = new Router({
     prefix: '/disguises'
@@ -128,13 +132,18 @@ disguiseRoutes.post('/generate', async ctx => {
             useIPFS: Boolean(body.useIPFS) || true
         }
 
-        let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true)
+        let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true);
         ctx.body = disguise;
     } catch(e) {
         console.log(e);
         ctx.status = 500;
         ctx.body = e;
     }
+});
+
+disguiseRoutes.get('/store', async ctx => {
+    await web3.listFiles(cid);
+    ctx.body = 'true';
 });
 
 disguiseRoutes.get('/all', async ctx => {

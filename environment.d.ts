@@ -10,6 +10,7 @@ declare global {
             ZAPPERFI_API_KEY: string;
             REST_API_KEYS: string;
             WEB3_TOKEN: string;
+            WEB3_CID: string;
         }
     }
 }

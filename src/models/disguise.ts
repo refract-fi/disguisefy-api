@@ -2,20 +2,17 @@ import {
   Sequelize,
   Model,
   DataTypes,
-  Optional,
-  HasManyGetAssociationsMixin,
-  HasManyAddAssociationMixin,
-  HasManyHasAssociationMixin,
-  Association,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin } from 'sequelize';
+  Optional } from 'sequelize';
+  
 import moment from 'moment';
 import DatabaseManager from '../db';
 import ZapperApi from '../lib/zapperfi';
+import Web3Api from '../lib/web3';
 import AddressBalances from './addressBalances';
 
 const dbManager = DatabaseManager.getInstance();
 const db = dbManager.getSequelize();
+const web3 = new Web3Api();
 
 interface DisguiseAttributes {
   id?: string;
@@ -75,15 +72,12 @@ class Disguise extends Model<DisguiseAttributes> {
   public cacheExpiration?: number | null;
   public options!: DisguiseOptions | null;
 
-  static associate(models: any) {
-    Disguise.hasOne(models.DisguiseCache, { foreignKey: 'disguiseId' });
-  }
-
   static async generate(address: string, name: string, duration: number, preset: number, options: DisguiseOptions, cache: boolean = true) {
     let url = Disguise.generateUrl();
     let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
     let addressBalances, disguise;
+    let cid;
 
     try {
       disguise = await Disguise.create({
@@ -112,18 +106,16 @@ class Disguise extends Model<DisguiseAttributes> {
           cacheGeneration: Number(moment().format('X')),
           cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
         });
+
+        if(disguise.options?.useIPFS) {
+          cid = await web3.store(disguise.toJSON(), disguise.url);
+        }
       }
       
       return disguise;
     } catch(e: any) {
-
-      let status: DisguiseStatus;
-
-      if(e.response?.status == 408) {
-        status = DisguiseStatus.ZAPPER_408_1;
-      } else {
-        status = DisguiseStatus.FAILED;
-      }
+      console.log(e);
+      let status: DisguiseStatus = (e.response?.status == 408) ? DisguiseStatus.ZAPPER_408_1 : DisguiseStatus.FAILED;
 
       await disguise?.update({
         status: status,
