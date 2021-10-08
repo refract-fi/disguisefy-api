@@ -9,6 +9,7 @@ export default interface IAsset {
     symbol: string;
     img?: string;
     protocol?: string;
+    appId?: string;
     collectionName?: string;
     collectionImg?: string;
     location?: any;

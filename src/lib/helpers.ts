@@ -3,6 +3,7 @@ import IAsset from "./interfaces/asset";
 import IToken from "./interfaces/token";
 
 const imgBase = 'https://storage.googleapis.com/zapper-fi-assets/tokens';
+const protocolImgBase = 'https://storage.googleapis.com/zapper-fi-assets/apps/';
 
 export enum AssetCategories {
     notUsed = 'notUsed',
@@ -148,7 +149,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
-                img: asset.img
+                img: asset.img,
+                protocolImg: `${protocolImgBase}${asset.appId}.png`
             });
             break;
 
@@ -224,7 +226,11 @@ export function extractTokens(asset: IAsset): IToken[] {
                 let assetTokens = asset.tokens;
                 if(assetTokens && assetTokens.length > 0) {
                     for(let assetToken of assetTokens) {
-                        assetToken.img = extractAssetImg(assetToken, asset.category);
+                        if(assetToken.category == 'pool') {
+                            assetToken.img = `${protocolImgBase}${asset.appId}.png`;
+                        } else {
+                            assetToken.img = extractAssetImg(assetToken, asset.category);
+                        }
                     }
                 }
 
@@ -248,7 +254,7 @@ export function extractTokens(asset: IAsset): IToken[] {
 
                 if(assetTokens && assetTokens.length > 0) {
                     for(let assetToken of assetTokens) {
-                        assetToken.img = extractAssetImg(assetToken, asset.category);
+                        assetToken.img = `${protocolImgBase}${asset.appId}.png`;
                         assetToken.protocol = asset.protocolDisplay;
 
                         tokens.push({

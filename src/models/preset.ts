@@ -97,9 +97,6 @@ export default class Preset {
                         index ++
                     }
                 }
-
-                let test = addressBalances.assetsPercentages
-
                 break;
 
             default:
