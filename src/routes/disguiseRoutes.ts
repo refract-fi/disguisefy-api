@@ -62,8 +62,7 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
 
         ctx.body = balances;
     } catch(e: any) {
-        console.log(e);
-        ctx.status = e.response?.status || 500;
+        ctx.status = e.status || e.response?.status || 500;
         ctx.body = e;
     } 
 });
