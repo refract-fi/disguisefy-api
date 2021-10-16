@@ -27,7 +27,7 @@ export default class Preset {
             if(Object.keys(assetList).length > 0) { // check if category has assets
                 for(let [assetAddress, assetDetails] of Object.entries(assetList)) { // assetDetails is an array of assets for some reason
                     if(assetDetails.address != undefined) {
-                        if(assetDetails.percentage < groupAssetsUnder) {
+                        if(Math.abs(assetDetails.percentage) < groupAssetsUnder) {
                             if(assetList.hasOwnProperty('groupedAssets')) {
                                 assetList['groupedAssets'].percentage += assetDetails.percentage;
                             } else {
