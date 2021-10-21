@@ -2,6 +2,7 @@ import Router from 'koa-router';
 import Disguise, { DisguiseOptions } from '../models/disguise';
 import ZapperApi from '../lib/zapperfi';
 import Web3Api from '../lib/web3';
+import moment from 'moment';
 
 const web3 = new Web3Api();
 const cid = process.env.WEB3_CID;
@@ -147,9 +148,16 @@ disguiseRoutes.post('/generate', async ctx => {
 
         let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true);
 
+        // temp for debug
+        console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);
+
         ctx.body = disguise?.filter();
     } catch(e) {
         console.log(e);
+
+        // temp for debug
+        console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: /failed -> ${ctx.request.body.address}`);
+        
         ctx.status = 500;
         ctx.body = e;
     }
