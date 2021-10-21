@@ -24,21 +24,16 @@ disguiseRoutes.post('/generate', async ctx => {
             groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
             ignoreNFTs: Boolean(body.ignoreNFTs) || false,
             isSnapshot: Boolean(body.isSnapshot) || false,
-            showNFTCollections: Boolean(body.showNFTCollections) || false
+            showNFTCollections: Boolean(body.showNFTCollections) || false,
+            chains: body.chains || ['*'],
+            assetCategories: body.assetCategories || ['*']
         }
 
         let disguise = await Disguise.generate(lowerCaseAddresses, body.name, body.duration, body.preset, password, options, true);
 
-        // temp for debug
-        // console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);
-
         ctx.body = disguise?.filter();
     } catch(e) {
         console.log(e);
-
-        // temp for debug
-        console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: /failed -> ${ctx.request.body.address}`);
-
         ctx.status = 500;
         ctx.body = e;
     }

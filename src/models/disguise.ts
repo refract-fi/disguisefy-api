@@ -42,6 +42,8 @@ export interface DisguiseOptions {
   ignoreNFTs: boolean;
   isSnapshot: boolean;
   showNFTCollections: boolean;
+  chains: [string];
+  assetCategories: [string];
 };
 
 enum DisguiseStatus {

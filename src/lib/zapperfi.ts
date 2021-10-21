@@ -13,6 +13,9 @@ import {
     getAssetCategories,
     addAsset
 } from './helpers';
+import { ALL } from 'dns';
+
+const ALL_CHAINS = '*';
 
 class ZapperApi {
     private static apiKey?: string = process.env.ZAPPERFI_API_KEY;
@@ -76,7 +79,13 @@ class ZapperApi {
             let uniqueNetworks: any = {};
 
             for(let network of networks) {
-                uniqueNetworks[network.network] = network.apps;
+                if(disguise.options?.chains && disguise.options?.chains[0] != ALL_CHAINS) {
+                    if(disguise.options?.chains.includes(network.network)) {
+                        uniqueNetworks[network.network] = network.apps;
+                    }
+                } else {
+                    uniqueNetworks[network.network] = network.apps;
+                }
             }
 
             return uniqueNetworks;
