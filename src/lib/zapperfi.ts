@@ -24,8 +24,16 @@ class ZapperApi {
 
     static async getSupportedProtocols(disguise: Disguise) {
         let params = new URLSearchParams();
-        params.append('addresses[]', disguise.address);
+
+        if(!disguise.addresses) {
+            throw new Error(`[getSupportedProtocols]: problem on field addresses for disguise ${disguise.id}`);
+        }
+
+        let addresses = disguise.addresses.split(',');
         params.append('api_key', ZapperApi.apiKey || '');
+        for(let address of addresses) {
+            params.append('addresses[]', address.toLowerCase());
+        }
         const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString(); 
         // const url = `${ZapperApi.apiUrl}/users/408?` + params.toString(); 
 
@@ -109,8 +117,16 @@ class ZapperApi {
     private static balancePromiseGenerator(disguise: Disguise, protocols: any) { // find TS compliant solutions to interface protocols
         let promises = [];
         let params = new URLSearchParams();
-        params.append('addresses[]', disguise.address);
+
+        if(!disguise.addresses) {
+            throw new Error(`[balancePromiseGenerator]: problem on field addresses for disguise ${disguise.id}`);
+        }
+
+        let addresses = disguise.addresses.split(',');
         params.append('api_key', ZapperApi.apiKey || '');
+        for(let address of addresses) {
+            params.append('addresses[]', address.toLowerCase());
+        }
 
         for(let protocol of protocols) {
             // Zapper allows to be network agnostic: maybe false and defaults to Ethereum?

@@ -136,7 +136,8 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
 disguiseRoutes.post('/generate', async ctx => {
     try {
         let body = ctx.request.body;
-        let address = String(body.address).toLowerCase();
+        let addresses = body.address || body.addresses;
+        addresses.forEach((address: string) => address.toLowerCase());
 
         let options: DisguiseOptions = {
             isGroupAssetsUnder: Boolean(body.isGroupAssetsUnder) || false,
@@ -146,7 +147,7 @@ disguiseRoutes.post('/generate', async ctx => {
             showNFTCollections: Boolean(body.showNFTCollections) || false
         }
 
-        let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true);
+        let disguise = await Disguise.generate(addresses, body.name, body.duration, body.preset, options, true);
 
         // temp for debug
         // console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);

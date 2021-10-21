@@ -16,6 +16,7 @@ const web3 = new Web3Api();
 interface DisguiseAttributes {
   id?: string;
   address: string;
+  addresses?: string | null;
   url: string;
   name: string;
   generation: number;
@@ -60,6 +61,7 @@ export interface DisguiseOutput extends Required<DisguiseAttributes> {};
 class Disguise extends Model<DisguiseAttributes> {
   public id?: string;
   public address!: string;
+  public addresses?: string | null;
   public url!: string;
   public name!: string;
   public generation!: number;
@@ -74,7 +76,7 @@ class Disguise extends Model<DisguiseAttributes> {
   public cacheExpiration?: number | null;
   public options!: DisguiseOptions | null;
 
-  static async generate(address: string, name: string, duration: number, preset: number, options: DisguiseOptions, cache: boolean = true) {
+  static async generate(addresses: string[], name: string, duration: number, preset: number, options: DisguiseOptions, cache: boolean = true) {
     let url = Disguise.generateUrl();
     let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
@@ -82,14 +84,14 @@ class Disguise extends Model<DisguiseAttributes> {
 
     try {
       disguise = Disguise.build({
-        address: address,
+        address: JSON.stringify(addresses),
         url: url, 
         name: name,
         generation: generationTimestamp,
         expiration: expirationTimestamp,
         preset: preset,
         permissions: {},
-        version: 1,
+        version: 2,
         provider: 'zapperfi',
         status: DisguiseStatus.FETCHING,
         cache: null,
@@ -109,7 +111,7 @@ class Disguise extends Model<DisguiseAttributes> {
           
           let ipfsSuccess = await web3.addRecord(disguise);
 
-          // entry will only be saved if IPFS failed, if not it wont be saved
+          // entry will only be saved if IPFS failed, if not it no DB record saved
           if(!ipfsSuccess) {
             disguise.update({
               status: DisguiseStatus.IPFS_FAILED
@@ -133,14 +135,14 @@ class Disguise extends Model<DisguiseAttributes> {
       let status: DisguiseStatus = (e.response?.status == 408) ? DisguiseStatus.ZAPPER_408_1 : DisguiseStatus.FAILED;
 
       await disguise?.update({
-        address: address,
+        address: JSON.stringify(addresses),
         status: status,
         cache: null,
         cacheGeneration: Number(moment().format('X')),
         cacheExpiration: Number(moment().add(0, 'minutes').format('X'))
       });
 
-      console.log(`Could not generate disguise for address: ${address}, name: ${name}, duration: ${duration}, preset: ${preset}`);
+      console.log(`Could not generate disguise for address: ${JSON.stringify(addresses)}, name: ${name}, duration: ${duration}, preset: ${preset}`);
       throw e;
     }
   }
@@ -213,7 +215,25 @@ Disguise.init({
   },
   address: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    get() {
+      return this.getDataValue('address');
+    }
+  },
+  addresses: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      let version = this.getDataValue('version');
+
+      switch(version) {
+        case 1:
+          return this.getDataValue('address') || null;
+        
+        case 2:
+          return this.getDataValue('address') != null ? JSON.parse(this.getDataValue('address')).join() : null
+      }
+      
+    }
   },
   url: {
     type: DataTypes.STRING,
