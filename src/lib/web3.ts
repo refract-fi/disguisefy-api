@@ -10,22 +10,40 @@ class Web3Api {
     private cid: string = process.env.WEB3_CID|| '';
     private client: Web3Storage;
 
+    /**
+     * Web3Api constructor
+     */
     constructor() {
         this.client = new Web3Storage({ token: this.token });
     }
 
+    /**
+     * Converts an object to a web3.storage-ready file buffer
+     * @param {object} obj data to be converted to a file buffer
+     * @param {string} name name of the file
+     * @returns {[File], string} an array containing the file buffer and its name
+     */
     toFile(obj: object, name: string) {
         const buffer = Buffer.from(JSON.stringify(obj));
         return [new File([buffer], name)];
     }
 
-    // use the url as the filename
+    /**
+     * Stores an object to a web3.storage
+     * @param {object} obj data to be converted to be saved
+     * @param {string} name used as the file name
+     * @returns {string} a web3.storage content identifier
+     */
     async store(obj: object, name: string) {
         const files = this.toFile(obj, name);
         const cid = await this.client.put(files)
         return cid;
     }
 
+    /**
+     * Logs the files contained in a web3.storage cid folder
+     * @param {string} cid the cid path to list files
+     */
     async listFiles(cid: string = '') {
         const refCID = await AppSettings.getCID();
         const res = await this.client.get(refCID);
