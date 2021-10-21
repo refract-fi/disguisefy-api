@@ -3,7 +3,11 @@ import { URLSearchParams } from 'url';
 import Disguise from '../models/disguise';
 import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
+import IStakingAsset from './interfaces/stakingAsset';
+import IAsset from './interfaces/asset';
+import IToken from './interfaces/token';
 import AddressBalances from '../models/addressBalances';
+import * as url from "url";
 
 import {
     AssetCategories,
@@ -12,6 +16,7 @@ import {
     getAssetCategories,
     addAsset
 } from './helpers';
+import { isPartiallyEmittedExpression } from 'typescript';
 
 class ZapperApi {
     private static apiKey?: string = process.env.ZAPPERFI_API_KEY;
@@ -54,16 +59,49 @@ class ZapperApi {
         }
     }
 
+    static async getSupportedNetworks(disguise: Disguise) {
+        let params = new URLSearchParams();
+
+        if(!disguise.addresses) {
+            throw new Error(`[getSupportedProtocols]: problem on field addresses for disguise ${disguise.id}`);
+        }
+
+        let addresses = disguise.addresses.split(',');
+        params.append('api_key', ZapperApi.apiKey || '');
+        for(let address of addresses) {
+            params.append('addresses[]', address.toLowerCase());
+        }
+        const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString(); 
+        // const url = `${ZapperApi.apiUrl}/users/408?` + params.toString(); 
+
+        try {
+            let response = await axios.get(url);
+            let networks = response.data;
+            let uniqueNetworks: any = {};
+
+            for(let network of networks) {
+                uniqueNetworks[network.network] = network.apps;
+            }
+
+            return uniqueNetworks;
+        } catch(e) {
+            throw e
+        }
+    }
+
     static async getBalances(disguise: Disguise, saveCache: boolean = false): Promise<AddressBalances> {
         let balances = getEmptyBalances();
         let assets = getEmptyAssets();
 
         try {
-            let uniqueProtocols: any = await ZapperApi.getSupportedProtocols(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
-            let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueProtocols);
+            let uniqueNetworks: any = await ZapperApi.getSupportedNetworks(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
+            let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueNetworks);
             let responses = await Promise.all(promises);
 
             for(let response of responses) {
+                let queryUrl = new url.URL(response.config.url || '');
+                let currentNetwork = queryUrl.searchParams.get('network') || '';
+
                 let protocolBalances = response.data;
                 let addressesProtocol: IAddressProtocol[] = Object.values(protocolBalances);
 
@@ -90,7 +128,7 @@ class ZapperApi {
                                 if(asset.hide) {
                                     // do nothing
                                 } else {
-                                    addAsset(assets, assetCategory, asset, balances);
+                                    addAsset(assets, assetCategory, asset, balances, currentNetwork);
                                 }
                             }
                         }
@@ -114,7 +152,7 @@ class ZapperApi {
         }
     }
 
-    private static balancePromiseGenerator(disguise: Disguise, protocols: any) { // find TS compliant solutions to interface protocols
+    private static balancePromiseGenerator(disguise: Disguise, networks: any) { // find TS compliant solutions to interface protocols
         let promises = [];
         let params = new URLSearchParams();
 
@@ -128,10 +166,15 @@ class ZapperApi {
             params.append('addresses[]', address.toLowerCase());
         }
 
-        for(let protocol of protocols) {
-            // Zapper allows to be network agnostic: maybe false and defaults to Ethereum?
-            let url = `${ZapperApi.apiUrl}/protocols/${protocol}/balances?` + params.toString();
-            promises.push(axios.get(url));
+        for(let [network, apps] of Object.entries(networks)) {
+            params.append('network', network);
+            // find TS compliant solution
+            // @ts-ignore
+            for(let app of apps) {
+                let url = `${ZapperApi.apiUrl}/protocols/${app.appId}/balances?` + params.toString();
+                promises.push(axios.get(url));
+            }
+            params.delete('network');
         }
 
         return promises;

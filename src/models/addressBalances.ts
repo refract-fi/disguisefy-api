@@ -54,7 +54,8 @@ export default class AddressBalances {
                     address: tokenDetails.address,
                     img: tokenDetails.img,
                     label: tokenDetails.label,
-                    protocolImg: tokenDetails.protocolImg
+                    protocolImg: tokenDetails.protocolImg,
+                    network: tokenDetails.network
                 };
             }
         }
@@ -68,6 +69,7 @@ class TokenDetails {
     img?: string;
     protocolImg?: string;
     label: string;
+    network?: string;
 
     constructor(details: any) { // find more TS compliant solution
         if(details[0]) {
@@ -77,6 +79,7 @@ class TokenDetails {
             this.img = details[0].img || '';
             this.label = details[0].label;
             this.protocolImg = details[0].protocolImg;
+            this.network = details[0].network;
         } else {
             //should not be used anymore
             this.percentage = details.balance;
@@ -85,6 +88,7 @@ class TokenDetails {
             this.img = details.img || '';
             this.label = details.label;
             this.protocolImg = details.protocolImg;
+            this.network = details.network;
         }
     }
 }

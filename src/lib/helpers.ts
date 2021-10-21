@@ -65,7 +65,7 @@ export function isJSON(text: any) {
     }
 }
 
-export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any) {
+export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any, currentNetwork: string) {
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset);
 
@@ -85,10 +85,9 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
         assets[key][asset.address].balance += asset.balanceUSD;
         console.log('[addAsset]: looks weird 2');
     } else {
-        // zapper introduced a new "farm" asset type, which they confirmed is not in their final form
-        // wait until it is final before clean rewrite
         if((asset.type == 'farm' || asset.type == 'claimable') && asset.tokens && asset.tokens.length > 0) {
             for(let token of tokens) {
+                token.network = currentNetwork;
                 if(token.metaType == 'staking' || token.metaType == 'staked') {
                     assets['staking'][token.address] = [token];
                     balances['staking'] += token.balance;
@@ -101,6 +100,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
                 }
             }
         } else {
+            for(let token of tokens) { token.network = currentNetwork; }
             assets[key][asset.address] = tokens;
             balances[key] += asset.balanceUSD;
         }

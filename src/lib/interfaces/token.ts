@@ -21,4 +21,5 @@ export default interface IToken {
     share?: number;
     supply?: number;
     volume?: number;
+    network?: string;
 }
