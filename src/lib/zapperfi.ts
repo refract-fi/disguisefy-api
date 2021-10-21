@@ -3,9 +3,6 @@ import { URLSearchParams } from 'url';
 import Disguise from '../models/disguise';
 import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
-import IStakingAsset from './interfaces/stakingAsset';
-import IAsset from './interfaces/asset';
-import IToken from './interfaces/token';
 import AddressBalances from '../models/addressBalances';
 import * as url from "url";
 
@@ -16,7 +13,6 @@ import {
     getAssetCategories,
     addAsset
 } from './helpers';
-import { isPartiallyEmittedExpression } from 'typescript';
 
 class ZapperApi {
     private static apiKey?: string = process.env.ZAPPERFI_API_KEY;
