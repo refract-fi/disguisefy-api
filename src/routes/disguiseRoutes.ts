@@ -11,6 +11,101 @@ const disguiseRoutes = new Router({
     prefix: '/disguises'
 });
 
+disguiseRoutes.post('/generate', async ctx => {
+    try {
+        let body = ctx.request.body;
+        let addresses = body.address || body.addresses;
+        let addressesArray = Array.isArray(addresses) ? addresses : [addresses];
+        let lowerCaseAddresses = addressesArray.map((address: string) => address.toLowerCase());
+        let password = body.password ? String(body.password) : null;
+
+        let options: DisguiseOptions = {
+            isGroupAssetsUnder: Boolean(body.isGroupAssetsUnder) || false,
+            groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
+            ignoreNFTs: Boolean(body.ignoreNFTs) || false,
+            isSnapshot: Boolean(body.isSnapshot) || false,
+            showNFTCollections: Boolean(body.showNFTCollections) || false
+        }
+
+        let disguise = await Disguise.generate(lowerCaseAddresses, body.name, body.duration, body.preset, password, options, true);
+
+        // temp for debug
+        // console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);
+
+        ctx.body = disguise?.filter();
+    } catch(e) {
+        console.log(e);
+
+        // temp for debug
+        console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: /failed -> ${ctx.request.body.address}`);
+
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('/url/:url/balances/:password?', async ctx => {
+    try {
+        let balances: any; // find more TS compliant solution
+        let url = ctx.params.url;
+        let password = ctx.params.password || null;
+
+        let disguise: Disguise | null = await Disguise.findOne({
+            where: {
+                url: url
+            }
+        });
+
+        if(disguise && disguise.isValid()) {
+            if(disguise.password != null) {
+                if(!password) ctx.throw(401, `Disguise is password protected, no password provided.`);
+                if(!disguise.isValidPassword(password)) ctx.throw(401, `Incorrect password.`);
+
+                if(disguise?.isCacheValid()) {
+                    if(disguise.status == 1) {
+                        balances = disguise.cache;
+                    } else {
+                        balances = await ZapperApi.getBalances(disguise, true);
+                    }
+                } else {
+                    balances = await ZapperApi.getBalances(disguise, true);
+                }
+    
+                balances.disguise = disguise.filter();
+            } else {
+                if(disguise?.isCacheValid()) {
+                    if(disguise.status == 1) {
+                        balances = disguise.cache;
+                    } else {
+                        balances = await ZapperApi.getBalances(disguise, true);
+                    }
+                } else {
+                    balances = await ZapperApi.getBalances(disguise, true);
+                }
+    
+                balances.disguise = disguise.filter();
+            }
+        } else {
+            // check on IPFS
+            let ipfsDisguise = await web3.findRecord(url);
+
+            if(ipfsDisguise) {
+                balances = ipfsDisguise.cache;
+                balances.disguise = ipfsDisguise.filter();
+            } else {
+                console.log('error');
+                ctx.throw(404, `No disguise found.`)
+            }
+        }
+
+        ctx.body = balances;
+    } catch(e: any) {
+        console.log(e);
+        ctx.status = e.status || e.response?.status || 500;
+        ctx.body = e;
+    } 
+});
+
 // disguiseRoutes.get('/:id/balances', async ctx => {
 //     try {
 //         let balances;
@@ -28,48 +123,6 @@ const disguiseRoutes = new Router({
 //         ctx.body = e;
 //     } 
 // });
-
-disguiseRoutes.get('/url/:url/balances', async ctx => {
-    try {
-        let balances: any; // find more TS compliant solution
-        let url = ctx.params.url;
-        let disguise: Disguise | null = await Disguise.findOne({
-            where: {
-                url: url
-            }
-        });
-
-        if(disguise && disguise.isValid()) {
-            if(disguise?.isCacheValid()) {
-                if(disguise.status == 1) {
-                    balances = disguise.cache;
-                } else {
-                    balances = await ZapperApi.getBalances(disguise, true);
-                }
-            } else {
-                balances = await ZapperApi.getBalances(disguise, true);
-            }
-
-            balances.disguise = disguise.filter();
-        } else {
-            // check on IPFS
-            let ipfsDisguise = await web3.findRecord(url);
-
-            if(ipfsDisguise) {
-                balances = ipfsDisguise.cache;
-                balances.disguise = ipfsDisguise.filter();
-            } else {
-                console.log('error');
-                ctx.throw(404, `No disguise found.`)
-            }
-        }
-
-        ctx.body = balances;
-    } catch(e: any) {
-        ctx.status = e.status || e.response?.status || 500;
-        ctx.body = e;
-    } 
-});
 
 // disguiseRoutes.get('/url/:url/balances/staking', async ctx => {
 //     try {
@@ -132,38 +185,6 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
 //         ctx.body = e;
 //     } 
 // });
-
-disguiseRoutes.post('/generate', async ctx => {
-    try {
-        let body = ctx.request.body;
-        let addresses = body.address || body.addresses;
-        let addressesArray = Array.isArray(addresses) ? addresses : [addresses];
-        let lowerCaseAddresses = addressesArray.map((address: string) => address.toLowerCase());
-
-        let options: DisguiseOptions = {
-            isGroupAssetsUnder: Boolean(body.isGroupAssetsUnder) || false,
-            groupAssetsUnder: Number(body.groupAssetsUnder) || 0.1,
-            ignoreNFTs: Boolean(body.ignoreNFTs) || false,
-            isSnapshot: Boolean(body.isSnapshot) || false,
-            showNFTCollections: Boolean(body.showNFTCollections) || false
-        }
-
-        let disguise = await Disguise.generate(lowerCaseAddresses, body.name, body.duration, body.preset, options, true);
-
-        // temp for debug
-        // console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);
-
-        ctx.body = disguise?.filter();
-    } catch(e) {
-        console.log(e);
-
-        // temp for debug
-        console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: /failed -> ${ctx.request.body.address}`);
-
-        ctx.status = 500;
-        ctx.body = e;
-    }
-});
 
 // disguiseRoutes.get('/:id', async ctx => {
 //     try {

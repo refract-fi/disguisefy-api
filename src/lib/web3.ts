@@ -118,7 +118,8 @@ class Web3Api {
                     cache: ipfsDisguise.cache,
                     options: ipfsDisguise.options,
                     cacheExpiration: null,
-                    cacheGeneration: null
+                    cacheGeneration: null,
+                    password: null
                 });
 
                 return disguise.isValid() ? disguise : null;

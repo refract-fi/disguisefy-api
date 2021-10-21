@@ -33,7 +33,7 @@ export default class AddressBalances {
         for(let [assetCategory, assetsList] of Object.entries(this.assetsPercentages)) {
             let assets = Object.values(assetsList);
             for(let [assetAddress, currentAsset] of Object.entries(assetsList)) {
-                // prevents simialr assets to delete each other
+                // prevents similar assets to delete each other
                 if(!marked.includes(currentAsset.address)) {
                     // find asset with same label but different address, likely similar asset ported to an other chain
                     let similarAssetIndex = assets.findIndex(asset => asset.label == currentAsset.label && asset.address != currentAsset.address );

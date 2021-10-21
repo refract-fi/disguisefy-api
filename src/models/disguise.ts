@@ -4,6 +4,8 @@ import {
   Optional } from 'sequelize';
 
 import moment from 'moment';
+import bcrypt from 'bcrypt';
+
 import DatabaseManager from '../db';
 import ZapperApi from '../lib/zapperfi';
 import Web3Api from '../lib/web3';
@@ -12,6 +14,7 @@ import AddressBalances from './addressBalances';
 const dbManager = DatabaseManager.getInstance();
 const db = dbManager.getSequelize();
 const web3 = new Web3Api();
+const saltRounds = 10;
 
 interface DisguiseAttributes {
   id?: string;
@@ -30,6 +33,7 @@ interface DisguiseAttributes {
   cacheGeneration: number | null;
   cacheExpiration: number | null;
   options: DisguiseOptions | null;
+  password: string | null;
 };
 
 export interface DisguiseOptions {
@@ -75,14 +79,17 @@ class Disguise extends Model<DisguiseAttributes> {
   public cacheGeneration?: number | null;
   public cacheExpiration?: number | null;
   public options!: DisguiseOptions | null;
+  public password?: string | null;
 
-  static async generate(addresses: string[], name: string, duration: number, preset: number, options: DisguiseOptions, cache: boolean = true) {
+  static async generate(addresses: string[], name: string, duration: number, preset: number, password: string | null, options: DisguiseOptions, cache: boolean = true) {
     let url = Disguise.generateUrl();
     let generationTimestamp = Number(moment.utc().format('X'));
     let expirationTimestamp = generationTimestamp + duration;
     let addressBalances, disguise;
 
     try {
+      let disguisePassword = password != null ? Disguise.hashPassword(password) : null;
+
       disguise = Disguise.build({
         address: JSON.stringify(addresses),
         url: url, 
@@ -97,7 +104,8 @@ class Disguise extends Model<DisguiseAttributes> {
         cache: null,
         cacheGeneration: null,
         cacheExpiration: null,
-        options: options
+        options: options,
+        password: disguisePassword 
       });
 
       if(cache) {
@@ -205,6 +213,18 @@ class Disguise extends Model<DisguiseAttributes> {
     delete disguiseData.cacheGeneration;
     delete disguiseData.cacheExpiration;
   }
+
+  static hashPassword(password: string | null) {
+    return password != null ? bcrypt.hashSync(password, saltRounds) : null;
+  }
+
+  isValidPassword(password: string | null) {
+    if(this.password == null) {
+      return password == this.password;
+    } else {
+      return (password && this.password) ? bcrypt.compareSync(password, this.password) : false;
+    }
+  }
 };
 
 Disguise.init({
@@ -288,6 +308,11 @@ Disguise.init({
     type: DataTypes.JSON,
     allowNull: true
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
+  }
 }, {
   sequelize: db,
   modelName: 'Disguise',
