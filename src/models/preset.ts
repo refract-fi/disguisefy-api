@@ -53,6 +53,19 @@ export default class Preset {
     // filters addressBalances in place
     filter(addressBalances: AddressBalances) {
         switch (this.presetLevel) {
+            case 0:
+                // add BalanceUSD in assetPercentages for dev purposes
+                for(let [category, assetList] of Object.entries(addressBalances.assetsPercentages)) {
+                    for(let [assetAddress, assetDetails] of Object.entries(assetList)) {
+                        // @ts-ignore
+                        if(addressBalances.assets[category][assetAddress]) {
+                            // @ts-ignore
+                            addressBalances.assetsPercentages[category][assetAddress].balance = addressBalances.assets[category][assetAddress][0].balance;
+                        }
+                    }
+                }
+                break;
+
             case 10:
                 addressBalances.balances = {};
                 addressBalances.assets = {};

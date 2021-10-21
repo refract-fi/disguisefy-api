@@ -94,6 +94,7 @@ class TokenDetails {
     protocolImg?: string;
     label: string;
     network?: string;
+    balance?: number;
 
     constructor(details: any) { // find more TS compliant solution
         if(details[0]) {
