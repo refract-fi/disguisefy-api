@@ -178,7 +178,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
                 protocol: asset.collectionName || asset.location?.protocolDisplay || '',
-                label: asset.label || asset.symbol,
+                label: asset.collectionName || asset.symbol,
                 img: asset.collectionImg
             });
             break;

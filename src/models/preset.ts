@@ -1,11 +1,14 @@
 import AddressBalances from "./addressBalances";
 import { AssetCategories } from "../lib/helpers";
+import Disguise, { DisguiseOptions } from "./disguise";
 
 export default class Preset {
     presetLevel: number;
+    disguiseOptions: DisguiseOptions | null;
 
-    constructor(presetLevel: number) {
-        this.presetLevel = presetLevel;
+    constructor(disguise: Disguise) {
+        this.presetLevel = disguise.preset;
+        this.disguiseOptions = disguise.options;
     }
 
     // TS is a bitch, idgaf
@@ -53,7 +56,8 @@ export default class Preset {
             case 10:
                 addressBalances.balances = {};
                 addressBalances.assets = {};
-                if (addressBalances.assetsPercentages.hasOwnProperty('nft')) {
+
+                if (addressBalances.assetsPercentages.hasOwnProperty('nft') && !this.disguiseOptions?.showNFTCollections) {
                     addressBalances.assetsPercentages['nft'] = {};
                 }
 
@@ -78,7 +82,7 @@ export default class Preset {
             case 20:
                 addressBalances.balances = {};
                 addressBalances.assets = {};
-                if (addressBalances.assetsPercentages.hasOwnProperty('nft')) {
+                if (addressBalances.assetsPercentages.hasOwnProperty('nft') && !this.disguiseOptions?.showNFTCollections) {
                     addressBalances.assetsPercentages['nft'] = {};
                 }
 

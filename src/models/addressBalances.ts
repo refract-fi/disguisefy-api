@@ -17,7 +17,7 @@ export default class AddressBalances {
         if(options?.ignoreNFTs) {
             Preset.removeNFTs(this);
         }
-
+        
         this.calcPercentages(options);
 
         if(options?.isGroupAssetsUnder) {

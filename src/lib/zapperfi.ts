@@ -3,9 +3,6 @@ import { URLSearchParams } from 'url';
 import Disguise from '../models/disguise';
 import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
-import IStakingAsset from './interfaces/stakingAsset';
-import IAsset from './interfaces/asset';
-import IToken from './interfaces/token';
 import AddressBalances from '../models/addressBalances';
 
 import {
@@ -95,7 +92,7 @@ class ZapperApi {
             }
 
             let addressBalances = new AddressBalances(balances, assets, disguise.options);
-            let preset = new Preset(disguise.preset);
+            let preset = new Preset(disguise);
             preset.filter(addressBalances);
 
             // do not wait for cache creation when regenerating while viewing

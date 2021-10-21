@@ -36,6 +36,7 @@ export interface DisguiseOptions {
   groupAssetsUnder: number;
   ignoreNFTs: boolean;
   isSnapshot: boolean;
+  showNFTCollections: boolean;
 };
 
 enum DisguiseStatus {
@@ -177,8 +178,8 @@ class Disguise extends Model<DisguiseAttributes> {
   }
 
   isCacheValid() {
-    // return false; // for dev only!!
-    return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
+    return false; // for dev only!!
+    // return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
   }
 
   filter() {
