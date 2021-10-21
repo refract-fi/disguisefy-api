@@ -133,10 +133,11 @@ class Disguise extends Model<DisguiseAttributes> {
       let status: DisguiseStatus = (e.response?.status == 408) ? DisguiseStatus.ZAPPER_408_1 : DisguiseStatus.FAILED;
 
       await disguise?.update({
+        address: address,
         status: status,
         cache: null,
         cacheGeneration: Number(moment().format('X')),
-        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+        cacheExpiration: Number(moment().add(0, 'minutes').format('X'))
       });
 
       console.log(`Could not generate disguise for address: ${address}, name: ${name}, duration: ${duration}, preset: ${preset}`);
@@ -148,7 +149,7 @@ class Disguise extends Model<DisguiseAttributes> {
     await disguise.update({
         cache: balances,
         cacheGeneration: Number(moment().format('X')),
-        cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+        cacheExpiration: Number(moment().add(15, 'minutes').format('X'))
       });
   }
 
@@ -178,8 +179,8 @@ class Disguise extends Model<DisguiseAttributes> {
   }
 
   isCacheValid() {
-    // return false; // for dev only!!
-    return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
+    return false; // for dev only!!
+    // return !moment(this.cacheExpiration, 'X').isBefore(moment()) && this.cache != null;
   }
 
   filter() {

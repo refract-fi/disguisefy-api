@@ -1,6 +1,5 @@
 import Router from 'koa-router';
 import Disguise, { DisguiseOptions } from '../models/disguise';
-import DisguiseCache from '../models/disguiseCache';
 import ZapperApi from '../lib/zapperfi';
 import Web3Api from '../lib/web3';
 
@@ -41,7 +40,11 @@ disguiseRoutes.get('/url/:url/balances', async ctx => {
 
         if(disguise && disguise.isValid()) {
             if(disguise?.isCacheValid()) {
-                balances = disguise.cache;
+                if(disguise.status == 1) {
+                    balances = disguise.cache;
+                } else {
+                    balances = await ZapperApi.getBalances(disguise, true);
+                }
             } else {
                 balances = await ZapperApi.getBalances(disguise, true);
             }
