@@ -51,7 +51,6 @@ class ZapperApi {
         let assets = getEmptyAssets();
 
         try {
-
             let uniqueProtocols: any = await ZapperApi.getSupportedProtocols(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
             let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueProtocols);
             let responses = await Promise.all(promises);

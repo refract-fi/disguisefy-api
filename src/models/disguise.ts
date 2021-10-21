@@ -120,7 +120,7 @@ class Disguise extends Model<DisguiseAttributes> {
             status: DisguiseStatus.SUCCESS,
             cache: addressBalances,
             cacheGeneration: Number(moment().format('X')),
-            cacheExpiration: Number(moment().add(5, 'minutes').format('X'))
+            cacheExpiration: Number(moment().add(15, 'minutes').format('X'))
           });
 
           await disguise.save();
@@ -141,7 +141,7 @@ class Disguise extends Model<DisguiseAttributes> {
       });
 
       console.log(`Could not generate disguise for address: ${address}, name: ${name}, duration: ${duration}, preset: ${preset}`);
-      return disguise;
+      throw e;
     }
   }
 

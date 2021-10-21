@@ -149,7 +149,7 @@ disguiseRoutes.post('/generate', async ctx => {
         let disguise = await Disguise.generate(address, body.name, body.duration, body.preset, options, true);
 
         // temp for debug
-        console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);
+        // console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: ${disguise?.url} -> ${address}`);
 
         ctx.body = disguise?.filter();
     } catch(e) {
@@ -157,7 +157,7 @@ disguiseRoutes.post('/generate', async ctx => {
 
         // temp for debug
         console.log(`[${moment().format('yyyy-mm-dd hh:mm:ss')}]: /failed -> ${ctx.request.body.address}`);
-        
+
         ctx.status = 500;
         ctx.body = e;
     }
