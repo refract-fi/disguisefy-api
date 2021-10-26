@@ -18,6 +18,8 @@ export enum AssetCategories {
     other = 'others'
 };
 
+const ROOT_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 const emptyBalances = {
     [AssetCategories.notUsed]: 0,
     [AssetCategories.wallet]: 0,
@@ -71,14 +73,19 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
 
     if(assets[key].hasOwnProperty(asset.address)) {
         for(let token of tokens) {
-            let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
-            if(foundToken) {
-                foundToken.balance += token.balance;
-                balances[key] += token.balance;
-
-                console.log('[addAsset]: looks weird 1');
+            // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
+            if(asset.address == ROOT_ADDRESS) {
+                assets[key][asset.address].push(token);
             } else {
-                console.log('[addAsset]: should not happen.');
+                let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
+                if(foundToken) {
+                    foundToken.balance += token.balance;
+                    balances[key] += token.balance;
+    
+                    console.log('[addAsset]: looks weird 1');
+                } else {
+                    console.log('[addAsset]: should not happen.');
+                }
             }
         }
         

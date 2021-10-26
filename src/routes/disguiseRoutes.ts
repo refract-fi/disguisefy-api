@@ -25,7 +25,7 @@ disguiseRoutes.post('/generate', async ctx => {
             ignoreNFTs: Boolean(body.ignoreNFTs) || false,
             isSnapshot: Boolean(body.isSnapshot) || false,
             showNFTCollections: Boolean(body.showNFTCollections) || false,
-            chains: body.chains || ['*'],
+            chains: body.chains || ['ethereum'], // change to ['*']
             assetCategories: body.assetCategories || ['*']
         }
 

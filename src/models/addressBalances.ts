@@ -2,6 +2,8 @@ import IToken from "../lib/interfaces/token";
 import { DisguiseOptions } from "./disguise";
 import Preset from "./preset";
 
+const ALL_CATEGORIES = '*';
+
 export default class AddressBalances {
     balances: IPercentages;
     percentages: IPercentages;
@@ -16,6 +18,10 @@ export default class AddressBalances {
 
         if(options?.ignoreNFTs) {
             Preset.removeNFTs(this);
+        }
+
+        if(options?.assetCategories && options.assetCategories[0] != ALL_CATEGORIES) {
+            Preset.removeCategories(this, options.assetCategories);
         }
         
         this.calcPercentages(options);

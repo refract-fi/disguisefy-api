@@ -13,7 +13,6 @@ import {
     getAssetCategories,
     addAsset
 } from './helpers';
-import { ALL } from 'dns';
 
 const ALL_CHAINS = '*';
 

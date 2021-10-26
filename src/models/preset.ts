@@ -25,6 +25,16 @@ export default class Preset {
         }
     }
 
+    static removeCategories(addressBalances: AddressBalances, assetCategories: String[]): void {
+        for(let [assetCategory, assetsList] of Object.entries(addressBalances.assets)) {
+            if(!assetCategories.includes(assetCategory)) {
+                // @ts-ignore
+                addressBalances.assets[assetCategory] = {};
+                addressBalances.balances[assetCategory] = 0;
+            }
+        }
+    }
+
     static groupAssets(addressBalances: AddressBalances, groupAssetsUnder: number) {
         for(let [category, assetList] of Object.entries(addressBalances.assetsPercentages)) {
             if(Object.keys(assetList).length > 0) { // check if category has assets
