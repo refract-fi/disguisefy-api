@@ -318,13 +318,13 @@ Disguise.init({
 }, {
   sequelize: db,
   modelName: 'Disguise',
+  tableName: 'Disguises',
   timestamps: false,
   paranoid: false
 });
 
 Disguise.addHook('afterFind', async (disguise: Disguise) => {
   if(disguise && moment(disguise.expiration, 'X').isBefore(moment())) {
-    console.log(`Disguise with id ${disguise.id} is expired: cya!`);
     await disguise.destroy();
   }
 });

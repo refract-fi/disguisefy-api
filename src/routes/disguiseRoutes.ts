@@ -1,5 +1,8 @@
 import Router from 'koa-router';
+
+import Attestation from '../models/attestation';
 import Disguise, { DisguiseOptions } from '../models/disguise';
+
 import ZapperApi from '../lib/zapperfi';
 import Web3Api from '../lib/web3';
 import moment from 'moment';
@@ -9,6 +12,62 @@ const cid = process.env.WEB3_CID;
 
 const disguiseRoutes = new Router({
     prefix: '/disguises'
+});
+
+disguiseRoutes.post('/attestations/:url/sign', async ctx => {
+    try {
+        let { address, hash } = ctx.request.body;
+        let success = false;
+
+        ctx.body = success;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('attestations/:url', async ctx => {
+    try {
+        let { url } = ctx.request.body;
+
+        let attesation = await Attestation.findOne({
+            where: {
+                url: url
+            }
+        });
+
+        ctx.body = attesation;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.post('/attestations/generate', async ctx => {
+    try {
+        let { name, amount } = ctx.request.body;
+
+        let attesation = await Attestation.create({
+            name: name,
+            type: 'uniswap-v3',
+            url: Attestation.generateUrl(10),
+            secret: Attestation.generateUrl(16),
+            status: 0,
+            amount: amount,
+            unit: 'eth',
+            generation: Number(moment.utc().format('X')),
+            confirmation: null,
+            expiration: null
+        });
+
+        ctx.body = attesation;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
 });
 
 disguiseRoutes.post('/generate', async ctx => {

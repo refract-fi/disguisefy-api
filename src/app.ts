@@ -11,6 +11,7 @@ import cors from 'koa-cors';
 import koaApikey from './koaApikey';
 import DatabaseManager from './db';
 import disguiseRoutes from './routes/disguiseRoutes';
+import attestationRoutes from './routes/disguiseRoutes';
 
 class App {
     private dbManager: DatabaseManager;
@@ -29,6 +30,7 @@ class App {
         this.api.use(cors({
             origin: '*'
         }));
+
         this.api.use(json());
         this.api.use(logger());
         this.api.use(bodyParser());
@@ -40,6 +42,7 @@ class App {
 
         this.api.use(this.router.routes()).use(this.router.allowedMethods());
         this.api.use(disguiseRoutes.routes()).use(disguiseRoutes.allowedMethods());
+        // this.api.use(attestationRoutes.routes()).use(attestationRoutes.allowedMethods());
 
         // example route
         this.router.get('/', async (ctx, next) => {
