@@ -5,7 +5,7 @@ import { isJSON } from './helpers';
 import AppSettings from '../models/appSettings';
 import Disguise from '../models/disguise';
 
-class Web3Api {
+export default class Web3Api {
     private token: string = process.env.WEB3_TOKEN || '';
     private cid: string = process.env.WEB3_CID|| '';
     private client: Web3Storage;
@@ -145,5 +145,3 @@ class Web3Api {
         }
     }
 }
-
-export default Web3Api;
