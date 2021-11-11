@@ -3,6 +3,8 @@ migrations/config/sequelize.json
 migrations/config/config.json
 src/config/sequelize.json
 src/config/config.json
+config/sequelize.json
+config/config.json
 .sequelizerc
 
 # Logs
