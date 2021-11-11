@@ -7,21 +7,31 @@ import logger from 'koa-logger';
 import json from 'koa-json';
 import bodyParser from 'koa-bodyparser';
 import cors from 'koa-cors';
+// import winston from 'winston';
+// import { SqlTransport } from 'winston-sql-transport';
 
 import koaApikey from './koaApikey';
 import DatabaseManager from './db';
+// import WinstonManager from './lib/winstonManager';
+
 import disguiseRoutes from './routes/disguiseRoutes';
-import attestationRoutes from './routes/disguiseRoutes';
+// import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
+// import attestationRoutes from './routes/disguiseRoutes';
 
 class App {
     private dbManager: DatabaseManager;
     private api: Koa;
     private router: Router;
+    // private logger: winston.Logger;
 
     constructor() {
         this.dbManager = DatabaseManager.getInstance();
         this.api = new Koa();
         this.router = new Router();
+        // this.logger = winston.createLogger({
+        //     format: winston.format.json(),
+        //     transports: [new SqlTransport(WinstonManager.getWinstonTransport())],
+        // });
     }
 
     async start() {
@@ -44,7 +54,7 @@ class App {
         this.api.use(disguiseRoutes.routes()).use(disguiseRoutes.allowedMethods());
         // this.api.use(attestationRoutes.routes()).use(attestationRoutes.allowedMethods());
 
-        // example route
+        // welcome route
         this.router.get('/', async (ctx, next) => {
             ctx.body = {
                 status: "Online",

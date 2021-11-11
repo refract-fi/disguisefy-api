@@ -3,39 +3,39 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('Disguises', {
       id: {
-        type: Sequelize.UUID
+        type: Sequelize.DataTypes.UUID
       },
       address: {
-        type: Sequelize.STRING
+        type: Sequelize.DataTypes.STRING
       },
       url: {
-        type: Sequelize.STRING
+        type: Sequelize.DataTypes.STRING
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.DataTypes.STRING
       },
       generation: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DataTypes.INTEGER
       },
       expiration: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DataTypes.INTEGER
       },
       preset: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DataTypes.INTEGER
       },
       permissions: {
-        type: Sequelize.JSON
+        type: Sequelize.DataTypes.JSON
       },
       version: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DataTypes.INTEGER
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DataTypes.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DataTypes.DATE
       }
     });
   },

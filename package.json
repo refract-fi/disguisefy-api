@@ -21,6 +21,7 @@
     "@types/koa-cors": "^0.0.2",
     "@types/uuid": "^8.3.1",
     "@types/validator": "^13.6.3",
+    "@types/winston": "^2.4.4",
     "@uniswap/sdk": "^3.0.3",
     "axios": "^0.21.4",
     "bcrypt": "^5.0.1",
@@ -40,7 +41,9 @@
     "node-fetch": "^3.0.0",
     "sequelize": "^6.6.5",
     "typescript": "^4.4.3",
-    "web3.storage": "^3.3.2"
+    "web3.storage": "^3.3.2",
+    "winston": "^3.3.3",
+    "winston-sql-transport": "^3.1.0"
   },
   "devDependencies": {
     "@types/koa": "^2.13.4",

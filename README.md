@@ -28,7 +28,7 @@ You need to install the sequelize-cli in order to properly setup the database:
 yarn add sequelize-cli
 ```
 
-To run migrations you will need to create migrations/config/config.json with the following format:
+To run migrations you will need to create config/config.json with the following format:
 
 ```
 {
