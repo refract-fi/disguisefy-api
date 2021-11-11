@@ -10,8 +10,10 @@ import cors from 'koa-cors';
 
 import koaApikey from './koaApikey';
 import DatabaseManager from './db';
+import { Logger } from './models/log';
 
 import disguiseRoutes from './routes/disguiseRoutes';
+import logRoutes from './routes/logRoutes';
 
 class App {
     private dbManager: DatabaseManager;
@@ -33,7 +35,7 @@ class App {
 
         this.api.use(json());
         this.api.use(logger((str, args) => {
-            console.log('koa-logger', str, args);
+            Logger.handleRequest(str, args);
         }));
         this.api.use(bodyParser());
         this.api.use(koaApikey({
@@ -44,6 +46,7 @@ class App {
 
         this.api.use(this.router.routes()).use(this.router.allowedMethods());
         this.api.use(disguiseRoutes.routes()).use(disguiseRoutes.allowedMethods());
+        this.api.use(logRoutes.routes()).use(logRoutes.allowedMethods());
         // this.api.use(attestationRoutes.routes()).use(attestationRoutes.allowedMethods());
 
         // welcome route

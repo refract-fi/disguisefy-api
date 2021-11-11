@@ -1,6 +1,7 @@
 import Router from 'koa-router';
 
 import Attestation from '../models/attestation';
+import Log from '../models/log';
 import Disguise, { DisguiseOptions } from '../models/disguise';
 
 import ZapperApi from '../lib/zapperfi';
