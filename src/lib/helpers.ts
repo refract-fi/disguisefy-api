@@ -157,6 +157,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
                 img: asset.img,
+                tokens: asset.tokens || [],
                 protocolImg: `${protocolImgBase}${asset.appId}.png`
             });
             break;
