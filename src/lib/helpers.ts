@@ -271,7 +271,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                             balance: assetToken.balanceUSD,
                             protocol: asset.protocolDisplay || asset.location?.protocolDisplay || '',
                             label: assetToken.label || assetToken.symbol || symbol,
-                            img: assetToken.img
+                            img: assetToken.img,
+                            tokens: assetToken.tokens
                         });
                     }
                 }

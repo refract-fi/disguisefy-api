@@ -103,26 +103,59 @@ export default class AddressBalances {
         let totalBNB: number = 0;
         let totalCelo: number = 0;
         let totalHarmony: number = 0;
+        let gasTokens = ['eth', 'matic', 'ftm', 'xdai', 'bnb', 'celo',]
 
         Object.keys(this.balances).map(key => {
             if (key != 'debt') {
                 total += isNaN(this.balances[key]) ? 0 : this.balances[key];
             }
         });
+        let totalEthArray: any = []
+        let notEthArray: any = []
+        // gasTokens.map((token) => {
 
+        // })
         for (let [category, assetList] of Object.entries(this.assets)) {
-            for (let [token, details] of (Object.entries(assetList))) {
-                let tokenDetails: any = new TokenDetails(details)
-                if (tokenDetails?.tokens[0]?.category === 'pool') {
-                    tokenDetails.tokens[0].tokens.map((token: any) => {
-                        if (token.symbol.toLowerCase().includes("eth") || token.symbol.toLowerCase().includes("WETH")) {
-                            totalEth += token.balanceUSD
-                        }
-                    })
-                } else if (tokenDetails.label.toLowerCase().includes("eth") || tokenDetails.label.toLowerCase().includes("WETH")) {
-                    totalEth += tokenDetails.percentage
+            if (category !== 'debt' && category !== 'nft') {
+                for (let [token, details] of (Object.entries(assetList))) {
+                    let detailsArray: any = details
+                    let tokenDetails: any = new TokenDetails(details)
+                    if (detailsArray.length > 1) {
+                        //This works for wallet assets with same address, will need to check also for other types
+                        detailsArray.map((detail: any) => {
+                            if (detail.symbol.toLowerCase().includes("eth") || detail.symbol.toLowerCase().includes("WETH")) {
+                                totalEth += detail.balance
+                                totalEthArray.push({ symbol: detail.symbol, balanceUSD: detail.balance })
+                            }
+                        })
+                    } else if (tokenDetails?.tokens[0]?.category === 'pool') {
+                        tokenDetails.tokens[0].tokens.map((token: any) => {
+                            if (token.symbol.toLowerCase().includes("eth") || token.symbol.toLowerCase().includes("WETH")) {
+                                totalEth += token.balanceUSD
+                                totalEthArray.push({ symbol: token.symbol, balanceUSD: token.balanceUSD })
+                            }
+                        })
+                    } else if (tokenDetails?.tokens[0]?.type === 'base') {
+                        tokenDetails?.tokens.map((token: any) => {
+                            if (token.symbol.toLowerCase().includes("eth") || token.symbol.toLowerCase().includes("WETH")) {
+                                totalEth += token.balanceUSD
+                                totalEthArray.push({ label: tokenDetails.label, symbol: token.symbol, balanceUSD: token.balanceUSD })
+                            }
+                        })
+                    } else if (tokenDetails.label.toLowerCase().includes("eth") || tokenDetails.label.toLowerCase().includes("WETH")) {
+                        totalEth += tokenDetails.percentage
+                        totalEthArray.push({ label: tokenDetails.label, balanceUSD: tokenDetails.percentage })
+                    } else {
+                        notEthArray.push({ label: tokenDetails.label, balanceUSD: tokenDetails.percentage })
+                    }
                 }
             }
+        }
+        console.log(totalEth)
+        console.log(totalEthArray)
+
+        this.stats = {
+            ethPercentage: totalEth/total * 100
         }
 
     }

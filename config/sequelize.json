@@ -11,8 +11,8 @@
     }
   },
   "development": {
-    "username": "eK22YeVQgfyzc5Y3",
-    "password": "VMGAKksiQIWzPitw",
+    "username": "Lc4ef16F0Z",
+    "password": "rU3bvKcDA26LRVno",
     "database": "disguisefy_dev",
     "host": "db-mysql-tor1-88299-do-user-1185599-0.b.db.ondigitalocean.com",
     "port": "25060",
@@ -22,8 +22,8 @@
     }
   },
   "production": {
-    "username": "GLI3yfdHBu",
-    "password": "TDBNN4pf4Qgm28nr",
+    "username": "t6qVayaNbr",
+    "password": "mJ9Qy40C8JRQOuJQ",
     "database": "disguisefy_prod",
     "host": "db-mysql-tor1-88299-do-user-1185599-0.b.db.ondigitalocean.com",
     "port": "25060",
