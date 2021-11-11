@@ -23,6 +23,7 @@ class Logger extends Model<LogAttributes> {
 
 };
 
+
 Logger.init({
     id: {
         type: DataTypes.INTEGER,
