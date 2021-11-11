@@ -1,5 +1,9 @@
 # Migrations config file
+migrations/config/sequelize.json
 migrations/config/config.json
+src/config/sequelize.json
+src/config/config.json
+.sequelizerc
 
 # Logs
 logs

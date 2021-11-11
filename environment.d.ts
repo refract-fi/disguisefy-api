@@ -15,4 +15,6 @@ declare global {
     }
 }
 
+declare module '../config/winston';
+
 export {}
