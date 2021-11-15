@@ -98,66 +98,94 @@ export default class AddressBalances {
         let total: number = 0;
         let totalEth: number = 0;
         let totalMatic: number = 0;
-        let totalFTM: number = 0;
-        let totalxDai: number = 0;
-        let totalBNB: number = 0;
+        let totalFtm: number = 0;
+        let totalxdai: number = 0;
+        let totalBnb: number = 0;
         let totalCelo: number = 0;
-        let totalHarmony: number = 0;
-        let gasTokens = ['eth', 'matic', 'ftm', 'xdai', 'bnb', 'celo',]
+        let totalOne: number = 0;
+        let gasTokens = ['eth', 'matic', 'ftm', 'xdai', 'bnb', 'celo', 'one']
 
         Object.keys(this.balances).map(key => {
             if (key != 'debt') {
                 total += isNaN(this.balances[key]) ? 0 : this.balances[key];
             }
         });
-        let totalEthArray: any = []
-        let notEthArray: any = []
-        // gasTokens.map((token) => {
-
-        // })
-        for (let [category, assetList] of Object.entries(this.assets)) {
-            if (category !== 'debt' && category !== 'nft') {
-                for (let [token, details] of (Object.entries(assetList))) {
-                    let detailsArray: any = details
-                    let tokenDetails: any = new TokenDetails(details)
-                    if (detailsArray.length > 1) {
-                        //This works for wallet assets with same address, will need to check also for other types
-                        detailsArray.map((detail: any) => {
-                            if (detail.symbol.toLowerCase().includes("eth") || detail.symbol.toLowerCase().includes("WETH")) {
-                                totalEth += detail.balance
-                                totalEthArray.push({ symbol: detail.symbol, balanceUSD: detail.balance })
-                            }
-                        })
-                    } else if (tokenDetails?.tokens[0]?.category === 'pool') {
-                        tokenDetails.tokens[0].tokens.map((token: any) => {
-                            if (token.symbol.toLowerCase().includes("eth") || token.symbol.toLowerCase().includes("WETH")) {
-                                totalEth += token.balanceUSD
-                                totalEthArray.push({ symbol: token.symbol, balanceUSD: token.balanceUSD })
-                            }
-                        })
-                    } else if (tokenDetails?.tokens[0]?.type === 'base') {
-                        tokenDetails?.tokens.map((token: any) => {
-                            if (token.symbol.toLowerCase().includes("eth") || token.symbol.toLowerCase().includes("WETH")) {
-                                totalEth += token.balanceUSD
-                                totalEthArray.push({ label: tokenDetails.label, symbol: token.symbol, balanceUSD: token.balanceUSD })
-                            }
-                        })
-                    } else if (tokenDetails.label.toLowerCase().includes("eth") || tokenDetails.label.toLowerCase().includes("WETH")) {
-                        totalEth += tokenDetails.percentage
-                        totalEthArray.push({ label: tokenDetails.label, balanceUSD: tokenDetails.percentage })
-                    } else {
-                        notEthArray.push({ label: tokenDetails.label, balanceUSD: tokenDetails.percentage })
+        gasTokens.map((gasToken) => {
+            let totalGasToken: number = 0;
+            for (let [category, assetList] of Object.entries(this.assets)) {
+                if (category !== 'debt' && category !== 'nft') {
+                    for (let [token, details] of (Object.entries(assetList))) {
+                        let detailsArray: any = details
+                        let tokenDetails: any = new TokenDetails(details)
+                        if (detailsArray.length > 1) {
+                            //This works for wallet assets with same address, will need to check also for other types
+                            detailsArray.map((detail: any) => {
+                                if (detail.symbol.toLowerCase().includes(`${gasToken}`) || detail.symbol.toLowerCase().includes(`w${gasToken}`)) {
+                                    totalGasToken += detail.balance
+                                }
+                            })
+                        } else if (tokenDetails?.tokens[0]?.category === 'pool') {
+                            tokenDetails.tokens[0].tokens.map((token: any) => {
+                                if (token.symbol.toLowerCase().includes(`${gasToken}`) || token.symbol.toLowerCase().includes(`w${gasToken}`)) {
+                                    totalGasToken += token.balanceUSD
+                                }
+                            })
+                        } else if (tokenDetails?.tokens[0]?.type === 'base') {
+                            tokenDetails?.tokens.map((token: any) => {
+                                if (token.symbol.toLowerCase().includes(`${gasToken}`) || token.symbol.toLowerCase().includes(`w${gasToken}`)) {
+                                    totalGasToken += token.balanceUSD
+                                }
+                            })
+                        } else if (tokenDetails.label.toLowerCase().includes(`${gasToken}`) || tokenDetails.label.toLowerCase().includes(`w${gasToken}`)) {
+                            totalGasToken += tokenDetails.percentage
+                        } else {
+                            
+                        }
                     }
                 }
             }
-        }
-        console.log(totalEth)
-        console.log(totalEthArray)
+            switch (gasToken) {
+                case "eth":
+                    totalEth = totalGasToken
+                    break;
+                case "matic":
+                    totalMatic = totalGasToken
+                    break;
+                case "ftm":
+                    totalFtm = totalGasToken
+                    break;
+                case "xdai":
+                    totalxdai = totalGasToken
+                    break;
+                case "bnb":
+                    totalBnb = totalGasToken
+                    break;
+                case "celo":
+                    totalCelo = totalGasToken
+                    break;
+                case "one":
+                    totalOne = totalGasToken
+                    break;
+                default:
+                    console.log("[ERROR]: invalid gas token: " + gasToken)
+            }
+        })
 
         this.stats = {
-            ethPercentage: totalEth/total * 100
+            ...this.stats,
+            ethPercentage: totalEth / total * 100,
+            maticPercentage: totalMatic / total * 100,
+            ftmPercentage: totalFtm / total * 100,
+            xdaiPercentage: totalxdai / total * 100,
+            bnbPercentage: totalBnb / total * 100,
+            celoPercentage: totalCelo / total * 100,
+            onePercentage: totalOne / total * 100
+            
         }
+    }
 
+    calcNetworkPercentages(options: DisguiseOptions | null){
+        
     }
 }
 
