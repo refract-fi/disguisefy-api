@@ -3,7 +3,11 @@ migrations/config/sequelize.json
 migrations/config/config.json
 src/config/sequelize.json
 src/config/config.json
+config/sequelize.json
+config/config.json
 .sequelizerc
+
+**/*.DS_STORE
 
 # Logs
 logs
@@ -124,3 +128,5 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+config
