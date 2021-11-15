@@ -18,4 +18,5 @@ export default interface IAsset {
     balance: number;
     balanceUSD: number;
     tokens?: IToken[];
+    network?: string;
 }

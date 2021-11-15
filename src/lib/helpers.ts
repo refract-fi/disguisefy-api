@@ -133,7 +133,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
-                img: asset.img
+                img: asset.img,
             });
             break;
 
@@ -144,7 +144,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
-                img: asset.img
+                img: asset.img,
+                network: asset.network
             });
             break;
 
