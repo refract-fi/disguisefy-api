@@ -30,6 +30,7 @@ export default class AddressBalances {
         this.calcStats(options);
         this.calcNetworkPercentages(options);
         this.calcProtocolPercentages(options);
+        this.calcImpermanentVulnerability(options);
         if (options?.isGroupAssetsUnder) {
             Preset.groupAssets(this, options.groupAssetsUnder);
         }
@@ -189,20 +190,7 @@ export default class AddressBalances {
     }
 
     calcNetworkPercentages(options: DisguiseOptions | null) {
-        // let totals: any = {
-        //     bsc: 0,
-        //     eth: 0,
-        //     fantom: 0,
-        //     polygon: 0,
-        //     celo: 0,
-        //     harmony: 0,
-        //     arbitrum: 0,
-        //     optimism: 0,
-        //     avalanche: 0
-        // }
-        let totals: any = {
-
-        }
+        let totals: any = {}
         for (let [category, assetList] of Object.entries(this.assets)) {
             if (category !== 'debt' && category !== 'nft') {
                 for (let [token, details] of (Object.entries(assetList))) {
@@ -212,27 +200,6 @@ export default class AddressBalances {
                             totals[asset.network] = 0
                         }
                         totals[asset.network] += asset.balance
-                        // if (asset.network === 'ethereum') {
-                        //     totals.eth += asset.balance
-                        // } else if (asset.network === 'polygon') {
-                        //     totals.polygon += asset.balance
-                        // } else if (asset.network === 'fantom') {
-                        //     totals.fantom += asset.balance
-                        // } else if (asset.network === 'binance-smart-chain') {
-                        //     totals.bsc += asset.balance
-                        // } else if (asset.network === 'celo') {
-                        //     totals.celo += asset.balance
-                        // } else if (asset.network === 'arbitrum') {
-                        //     totals.arbitrum += asset.balance
-                        // } else if (asset.network === 'optimism') {
-                        //     totals.optimism += asset.balance
-                        // } else if (asset.network === 'avalanche') {
-                        //     totals.avalanche = asset.balance
-                        // } else if (asset.network === 'harmony') {
-                        //     totals.harmony = asset.balance
-                        // } else {
-                        //     console.log("[ERROR]: Asset not supported")
-                        // }
                     })
                 }
             }
@@ -269,8 +236,12 @@ export default class AddressBalances {
         }
     }
 
-    calcDebtPercentages(options: DisguiseOptions | null) {
+    calcImpermanentVulnerability(options: DisguiseOptions | null) {
 
+    }
+
+    calcGasSpent(options: DisguiseOptions | null) {
+        
     }
 }
 

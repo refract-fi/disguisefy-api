@@ -28,16 +28,16 @@ class ZapperApi {
     static async getSupportedProtocols(disguise: Disguise) {
         let params = new URLSearchParams();
 
-        if(!disguise.addresses) {
+        if (!disguise.addresses) {
             throw new Error(`[getSupportedProtocols]: problem on field addresses for disguise ${disguise.id}`);
         }
 
         let addresses = disguise.addresses.split(',');
         params.append('api_key', ZapperApi.apiKey || '');
-        for(let address of addresses) {
+        for (let address of addresses) {
             params.append('addresses[]', address.toLowerCase());
         }
-        const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString(); 
+        const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString();
         // const url = `${ZapperApi.apiUrl}/users/408?` + params.toString(); 
 
         try {
@@ -45,14 +45,14 @@ class ZapperApi {
             let networks = response.data;
             let uniqueProtocols = new Set();
 
-            for(let network of networks) {
-                for(let app of network.apps) {
+            for (let network of networks) {
+                for (let app of network.apps) {
                     uniqueProtocols.add(app.appId);
                 }
             }
 
             return Array.from(uniqueProtocols);
-        } catch(e) {
+        } catch (e) {
             throw e
         }
     }
@@ -60,16 +60,16 @@ class ZapperApi {
     static async getSupportedNetworks(disguise: Disguise) {
         let params = new URLSearchParams();
 
-        if(!disguise.addresses) {
+        if (!disguise.addresses) {
             throw new Error(`[getSupportedProtocols]: problem on field addresses for disguise ${disguise.id}`);
         }
 
         let addresses = disguise.addresses.split(',');
         params.append('api_key', ZapperApi.apiKey || '');
-        for(let address of addresses) {
+        for (let address of addresses) {
             params.append('addresses[]', address.toLowerCase());
         }
-        const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString(); 
+        const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString();
         // const url = `${ZapperApi.apiUrl}/users/408?` + params.toString(); 
 
         try {
@@ -77,9 +77,9 @@ class ZapperApi {
             let networks = response.data;
             let uniqueNetworks: any = {};
 
-            for(let network of networks) {
-                if(disguise.options?.chains && disguise.options?.chains[0] != ALL_CHAINS) {
-                    if(disguise.options?.chains.includes(network.network)) {
+            for (let network of networks) {
+                if (disguise.options?.chains && disguise.options?.chains[0] != ALL_CHAINS) {
+                    if (disguise.options?.chains.includes(network.network)) {
                         uniqueNetworks[network.network] = network.apps;
                     }
                 } else {
@@ -88,7 +88,7 @@ class ZapperApi {
             }
 
             return uniqueNetworks;
-        } catch(e) {
+        } catch (e) {
             throw e
         }
     }
@@ -102,34 +102,34 @@ class ZapperApi {
             let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueNetworks);
             let responses = await Promise.all(promises);
 
-            for(let response of responses) {
+            for (let response of responses) {
                 let queryUrl = new url.URL(response.config.url || '');
                 let currentNetwork = queryUrl.searchParams.get('network') || '';
 
                 let protocolBalances = response.data;
                 let addressesProtocol: IAddressProtocol[] = Object.values(protocolBalances);
 
-                for(let addressProtocol of addressesProtocol) {
-                    for(let product of addressProtocol.products) {
-                        for(let asset of product.assets) {
-                            if(!asset.category) {
-                                if(asset.location && asset.location.type) {
+                for (let addressProtocol of addressesProtocol) {
+                    for (let product of addressProtocol.products) {
+                        for (let asset of product.assets) {
+                            if (!asset.category) {
+                                if (asset.location && asset.location.type) {
                                     asset.category = asset.location.type; // put the location type in category (some edge cases)
-                                } else if(asset.type) {
+                                } else if (asset.type) {
                                     asset.category = asset.type;
                                 }
                             }
-                            
-                            if(asset.category == 'staked' || asset.category == 'farm') { 
+
+                            if (asset.category == 'staked' || asset.category == 'farm') {
                                 // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
-                                asset.category = 'staking';  
+                                asset.category = 'staking';
                             }
 
-                            if(asset.category == 'pool' && asset.location && (asset.location.type == 'staked' || asset.location.type == 'staking')) {
+                            if (asset.category == 'pool' && asset.location && (asset.location.type == 'staked' || asset.location.type == 'staking')) {
                                 // do not add this is pool as we will likely receive it from staking-balances
                             } else {
                                 let assetCategory: AssetCategories = getAssetCategories(asset.category);
-                                if(asset.hide) {
+                                if (asset.hide) {
                                     // do nothing
                                 } else {
                                     addAsset(assets, assetCategory, asset, balances, currentNetwork);
@@ -145,12 +145,12 @@ class ZapperApi {
             preset.filter(addressBalances);
 
             // do not wait for cache creation when regenerating while viewing
-            if(saveCache) {
+            if (saveCache) {
                 Disguise.saveCache(disguise, addressBalances);
             }
 
             return addressBalances;
-        } catch(e) {
+        } catch (e) {
             console.log(`[zapperFi.getBalances]: ${e}`);
             throw e;
         }
@@ -160,21 +160,21 @@ class ZapperApi {
         let promises = [];
         let params = new URLSearchParams();
 
-        if(!disguise.addresses) {
+        if (!disguise.addresses) {
             throw new Error(`[balancePromiseGenerator]: problem on field addresses for disguise ${disguise.id}`);
         }
 
         let addresses = disguise.addresses.split(',');
         params.append('api_key', ZapperApi.apiKey || '');
-        for(let address of addresses) {
+        for (let address of addresses) {
             params.append('addresses[]', address.toLowerCase());
         }
 
-        for(let [network, apps] of Object.entries(networks)) {
+        for (let [network, apps] of Object.entries(networks)) {
             params.append('network', network);
             // find TS compliant solution
             // @ts-ignore
-            for(let app of apps) {
+            for (let app of apps) {
                 let url = `${ZapperApi.apiUrl}/protocols/${app.appId}/balances?` + params.toString();
                 promises.push(axios.get(url));
             }
@@ -183,6 +183,39 @@ class ZapperApi {
 
         return promises;
     }
+
+    // static async getTransactions(disguise: Disguise, saveCache: boolean = false) {
+
+    //     try {
+    //         let uniqueNetworks: any = await ZapperApi.getSupportedNetworks(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
+    //         let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueNetworks);
+    //         let responses = await Promise.all(promises);
+
+    //         for (let response of responses) {
+    //             let queryUrl = new url.URL(response.config.url || '');
+    //             let currentNetwork = queryUrl.searchParams.get('network') || '';
+
+    //             let protocolBalances = response.data;
+    //             let addressesProtocol: IAddressProtocol[] = Object.values(protocolBalances);
+
+
+    //         }
+
+    //         let addressTransactions = new AddressBalances(balances, assets, disguise.options);
+    //         let preset = new Preset(disguise);
+    //         preset.filter(addressTransactions);
+
+    //         // do not wait for cache creation when regenerating while viewing
+    //         if (saveCache) {
+    //             Disguise.saveCache(disguise, addressTransactions);
+    //         }
+
+    //         return addressTransactions;
+    //     } catch (e) {
+    //         console.log(`[zapperFi.getBalances]: ${e}`);
+    //         throw e;
+    //     }
+    // }
 }
 
 export default ZapperApi;
