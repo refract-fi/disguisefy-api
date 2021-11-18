@@ -14,7 +14,7 @@ import {
     addAsset
 } from './helpers';
 
-const ALL_CHAINS = '*';
+const ALL_CHAINS = 'all';
 
 class ZapperApi {
     private static apiKey?: string = process.env.ZAPPERFI_API_KEY;

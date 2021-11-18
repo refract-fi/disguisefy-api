@@ -85,8 +85,8 @@ disguiseRoutes.post('/generate', async ctx => {
             ignoreNFTs: Boolean(body.ignoreNFTs) || false,
             isSnapshot: Boolean(body.isSnapshot) || false,
             showNFTCollections: Boolean(body.showNFTCollections) || false,
-            chains: body.chains || ['ethereum'], // change to ['*']
-            assetCategories: body.assetCategories || ['*']
+            chains: body.chains || ['all'], // change to ['*']
+            assetCategories: body.assetCategories || ['all']
         }
 
         let disguise = await Disguise.generate(lowerCaseAddresses, body.name, body.duration, body.preset, password, options, true);
