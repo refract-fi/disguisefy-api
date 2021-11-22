@@ -33,10 +33,7 @@ class Log extends Model<LogAttributes> {
 
 export class Logger {
   static handleRequest(a: any, b: any) {
-    console.log('a');
-    console.log(a);
-    console.log('b');
-    console.log(b);
+    // ici logger
   }
 };
 

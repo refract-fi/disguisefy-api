@@ -203,7 +203,9 @@ class Disguise extends Model<DisguiseAttributes> {
       generation: this.generation,
       preset: this.preset,
       options: {
-        isSnapshot: this.options?.isSnapshot
+        isSnapshot: this.options?.isSnapshot,
+        chains: this.options?.chains,
+        assetCategories: this.options?.assetCategories
       }
     };
   }
