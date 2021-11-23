@@ -2,7 +2,7 @@ import IToken from "../lib/interfaces/token";
 import { DisguiseOptions } from "./disguise";
 import Preset from "./preset";
 
-const ALL_CATEGORIES = '*';
+const ALL_CATEGORIES = 'all';
 
 export default class AddressBalances {
     balances: IPercentages;
