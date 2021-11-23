@@ -26,11 +26,16 @@ export default class AddressBalances {
             Preset.removeCategories(this, options.assetCategories);
         }
 
+        let totalWithoutNFTs: number = 0;
+        Object.keys(this.balances).map(key => {
+            if (key != 'debt' && key != 'nft') {
+                totalWithoutNFTs += isNaN(this.balances[key]) ? 0 : this.balances[key];
+            }
+        });
+
         this.calcPercentages(options);
-        this.calcStats(options);
-        this.calcNetworkPercentages(options);
-        this.calcProtocolPercentages(options);
-        this.calcImpermanentVulnerability(options);
+        this.calcStats(options, totalWithoutNFTs);
+
         if (options?.isGroupAssetsUnder) {
             Preset.groupAssets(this, options.groupAssetsUnder);
         }
@@ -62,7 +67,6 @@ export default class AddressBalances {
 
     calcPercentages(options: DisguiseOptions | null) {
         let total: number = 0;
-
         Object.keys(this.balances).map(key => {
             if (key != 'debt') {
                 total += isNaN(this.balances[key]) ? 0 : this.balances[key];
@@ -96,9 +100,16 @@ export default class AddressBalances {
         }
     }
 
-    calcStats(options: DisguiseOptions | null) {
+    calcStats(options: DisguiseOptions | null, total: number){
 
-        let total: number = 0;
+        this.calcGasPercentages(options, total)
+        this.calcNetworkPercentages(options);
+        this.calcProtocolPercentages(options);
+        this.calcImpermanentVulnerability(options);
+    }
+
+    calcGasPercentages(options: DisguiseOptions | null, total: number) {
+
         let totalEth: number = 0;
         let totalMatic: number = 0;
         let totalFtm: number = 0;
@@ -108,11 +119,6 @@ export default class AddressBalances {
         let totalOne: number = 0;
         let gasTokens = ['eth', 'matic', 'ftm', 'xdai', 'bnb', 'celo', 'one']
 
-        Object.keys(this.balances).map(key => {
-            if (key != 'debt') {
-                total += isNaN(this.balances[key]) ? 0 : this.balances[key];
-            }
-        });
         gasTokens.map((gasToken) => {
             let totalGasToken: number = 0;
             for (let [category, assetList] of Object.entries(this.assets)) {
@@ -190,23 +196,31 @@ export default class AddressBalances {
     }
 
     calcNetworkPercentages(options: DisguiseOptions | null) {
-        let totals: any = {}
+        let networkTotals: any = {}
+        let test: any = 0
+        let networkPercentages: any = {}
         for (let [category, assetList] of Object.entries(this.assets)) {
-            if (category !== 'debt' && category !== 'nft') {
+            if ((category !== 'debt' && category !== 'nft')) {
                 for (let [token, details] of (Object.entries(assetList))) {
                     let detailsArray: any = details
                     detailsArray.map((asset: any) => {
-                        if(!totals[asset.network]){
-                            totals[asset.network] = 0
+                        if(!networkTotals[asset.network]){
+                            networkTotals[asset.network] = 0
                         }
-                        totals[asset.network] += asset.balance
+                        networkTotals[asset.network] += asset.balance
+                        test += asset.balance
                     })
                 }
             }
         }
+        for(let [network, networkTotal] of Object.entries(networkTotals)){
+            let networkAmount: any = networkTotal
+            networkPercentages[network] = networkAmount/ test
+        }
+
         this.stats = {
             ...this.stats,
-            networkPercentages: totals
+            networkPercentages: networkPercentages
         }
     }
     calcProtocolPercentages(options: DisguiseOptions | null) {

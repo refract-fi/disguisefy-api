@@ -75,6 +75,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
             if(asset.address == ROOT_ADDRESS) {
                 assets[key][asset.address].push(token);
+                balances[key] += token.balance;
             } else {
                 let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
                 if(foundToken) {
@@ -109,6 +110,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             for(let token of tokens) { token.network = currentNetwork; }
             assets[key][asset.address] = tokens;
             balances[key] += asset.balanceUSD;
+            
         }
     }
 }

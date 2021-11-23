@@ -108,7 +108,7 @@ class ZapperApi {
 
                 let protocolBalances = response.data;
                 let addressesProtocol: IAddressProtocol[] = Object.values(protocolBalances);
-
+                
                 for (let addressProtocol of addressesProtocol) {
                     for (let product of addressProtocol.products) {
                         for (let asset of product.assets) {
