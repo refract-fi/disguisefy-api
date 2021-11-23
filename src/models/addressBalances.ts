@@ -253,10 +253,6 @@ export default class AddressBalances {
     calcImpermanentVulnerability(options: DisguiseOptions | null) {
 
     }
-
-    calcGasSpent(options: DisguiseOptions | null) {
-        
-    }
 }
 
 class TokenDetails {
