@@ -3,6 +3,7 @@ import { URLSearchParams } from 'url';
 import Disguise from '../models/disguise';
 import Preset from '../models/preset';
 import IAddressProtocol from './interfaces/addressProtocol';
+import IAddressList from './interfaces/addressList';
 import AddressBalances from '../models/addressBalances';
 import * as url from "url";
 
@@ -11,7 +12,8 @@ import {
     getEmptyBalances,
     getEmptyAssets,
     getAssetCategories,
-    addAsset
+    addAsset,
+    extractGas
 } from './helpers';
 
 const ALL_CHAINS = 'all';
@@ -23,6 +25,37 @@ class ZapperApi {
 
     constructor() {
 
+    }
+
+    static async getTransactionsGas(addresses: string[], chains: string[]) {
+        let addressGasContrainers: any = {};
+
+        for(let address of addresses) {
+            let gasContrainer: any = {};
+
+            for(let chain of chains) {
+                gasContrainer[chain] = 0;
+            }
+
+            addressGasContrainers[address] = gasContrainer;
+
+            let transactions = await ZapperApi.getTransactions([address], chains);
+            extractGas(transactions, gasContrainer);
+        }
+
+        return addressGasContrainers;
+    }
+
+    static async getTransactions(addresses: string[], chains: string[]) {
+        let promises = ZapperApi.transactionsPromiseGenerator(addresses, chains)
+        let responses = await Promise.all(promises);
+        let transactions = [];
+
+        for(let response of responses) {
+            transactions.push(...response.data.data);
+        }
+
+        return transactions;
     }
 
     static async getSupportedProtocols(disguise: Disguise) {
@@ -37,6 +70,7 @@ class ZapperApi {
         for(let address of addresses) {
             params.append('addresses[]', address.toLowerCase());
         }
+
         const url = `${ZapperApi.apiUrl}/protocols/balances/supported?` + params.toString(); 
         // const url = `${ZapperApi.apiUrl}/users/408?` + params.toString(); 
 
@@ -178,6 +212,26 @@ class ZapperApi {
                 let url = `${ZapperApi.apiUrl}/protocols/${app.appId}/balances?` + params.toString();
                 promises.push(axios.get(url));
             }
+            params.delete('network');
+        }
+
+        return promises;
+    }
+
+    private static transactionsPromiseGenerator(addresses: string[], chains: string[]) {
+        let promises = [];
+        let params = new URLSearchParams();
+
+        params.append('api_key', ZapperApi.apiKey || '');
+        for(let address of addresses) {
+            params.append('address', address.toLowerCase());
+            params.append('addresses[]', address.toLowerCase());
+        }
+
+        for(let chain of chains) {
+            params.append('network', chain);
+            let url = `${ZapperApi.apiUrl}/transactions?` + params.toString();
+            promises.push(axios.get(url));
             params.delete('network');
         }
 

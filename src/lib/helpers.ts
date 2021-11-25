@@ -300,3 +300,9 @@ export function extractAssetImg(asset: any, assetCategory: string) {
 
     return img;
 }
+
+export function extractGas(transactions: any, gasContrainer: any) {
+    for(let transaction of transactions) {
+        gasContrainer[transaction.network] += transaction.gas;
+    }
+}

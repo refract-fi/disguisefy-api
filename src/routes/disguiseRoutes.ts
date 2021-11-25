@@ -15,6 +15,34 @@ const disguiseRoutes = new Router({
     prefix: '/disguises'
 });
 
+disguiseRoutes.get('/transactions/gas', async ctx => {
+    let { addresses, chains } = ctx.request.body;
+
+    try {
+        let gasContrainer = await ZapperApi.getTransactionsGas(addresses, chains);
+
+        ctx.body = gasContrainer;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('/transactions', async ctx => {
+    let { addresses, chains } = ctx.request.body;
+
+    try {
+        let transactions = await ZapperApi.getTransactions(addresses, chains);
+
+        ctx.body = transactions;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
 disguiseRoutes.post('/attestations/:url/sign', async ctx => {
     try {
         let { address, hash } = ctx.request.body;
