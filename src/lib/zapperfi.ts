@@ -28,7 +28,7 @@ class ZapperApi {
     }
 
     static async getTransactionsGas(addresses: string[], chains: string[]) {
-        let addressGasContrainers: any = {};
+        let addressGasContainers: any = {};
 
         for(let address of addresses) {
             let gasContrainer: any = {};
@@ -37,13 +37,13 @@ class ZapperApi {
                 gasContrainer[chain] = 0;
             }
 
-            addressGasContrainers[address] = gasContrainer;
+            addressGasContainers[address] = gasContrainer;
 
             let transactions = await ZapperApi.getTransactions([address], chains);
             extractGas(transactions, gasContrainer);
         }
 
-        return addressGasContrainers;
+        return addressGasContainers;
     }
 
     static async getTransactions(addresses: string[], chains: string[]) {
