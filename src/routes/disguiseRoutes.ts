@@ -5,6 +5,7 @@ import Log from '../models/log';
 import Disguise, { DisguiseOptions } from '../models/disguise';
 
 import ZapperApi from '../lib/zapperfi';
+import CoinGeckoApi from '../lib/coingecko';
 import Web3Api from '../lib/web3';
 import moment from 'moment';
 
@@ -13,6 +14,42 @@ const cid = process.env.WEB3_CID;
 
 const disguiseRoutes = new Router({
     prefix: '/disguises'
+});
+
+disguiseRoutes.get('/coins/list', async ctx=> {
+    try {
+        let coins = await CoinGeckoApi.getCoinsList();
+
+        ctx.body = coins;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('/coins/gas/prices', async ctx=> {
+    try {
+        let prices = await CoinGeckoApi.getGasCoinsPrices();
+
+        ctx.body = prices;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('/coins/gas/prices/init', async ctx=> {
+    try {
+        let status = await CoinGeckoApi.initGasCoinsPrices();
+
+        ctx.body = status;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
 });
 
 disguiseRoutes.get('/transactions/gas', async ctx => {
