@@ -29,7 +29,7 @@ export default class AddressBalances {
         if(options?.isGroupAssetsUnder) {
             Preset.groupAssets(this, options.groupAssetsUnder);
         }
-
+        
         this.groupAssetsByLabel()
     }
 

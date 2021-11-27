@@ -15,6 +15,7 @@ import {
     addAsset,
     extractGas
 } from './helpers';
+import Price from '../models/price';
 
 const ALL_CHAINS = 'all';
 
@@ -43,6 +44,26 @@ class ZapperApi {
             extractGas(transactions, gasContrainer);
         }
 
+        for(let [address, gasTokens] of Object.entries(addressGasContainers)){
+            try{
+                //@ts-ignore
+                for(let [network, amount] of Object.entries(gasTokens)){
+                    let gasToken = await Price.findOne({
+                        where: {
+                            network: network
+                        }
+                    })
+                    if(!gasToken){
+                        // add throw error
+                    }
+                    //@ts-ignore
+                    addressGasContainers[address][`${network}USD`] = amount * gasToken?.priceUSD
+                }    
+            }catch(e){
+                console.log(e)
+            }
+        }
+        console.log(addressGasContainers)
         return addressGasContainers;
     }
 
