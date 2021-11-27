@@ -1,4 +1,3 @@
-import { ifError } from 'assert';
 import axios from 'axios';
 import moment from 'moment';
 import { URLSearchParams } from 'url';
@@ -90,6 +89,36 @@ class CoinGeckoApi {
                     symbolDisplay: null,
                     labelDisplay: null,
                     networkDisplay: null
+                });
+            }
+            
+            status = true;
+        } catch(e) {
+            console.log('Could not initialize coin prices.')
+            console.log(e);
+        } finally {
+            return status;
+        }
+    }
+
+    static async updateGasCoinsPrices() {
+        let status  = false;
+
+        try {
+            let updatedGasCoinsPrices = await CoinGeckoApi.getGasCoinsPrices();
+
+            for(let [network, price] of Object.entries(updatedGasCoinsPrices)) {
+                // @ts-ignore
+                let newPrice = parseFloat(price.usd);
+                console.log(newPrice);
+
+                await Price.update({
+                    priceUSD: newPrice,
+                    updatedAt: moment().unix(),
+                    updatedAtDisplay: moment.utc().format('YYYY-MM-DD HH:mm:ss')
+                }, {
+                    where: { sourceIdentifier: network },
+                    logging: console.log
                 });
             }
             

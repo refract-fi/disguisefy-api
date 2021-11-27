@@ -8,27 +8,27 @@ import DatabaseManager from '../db';
 const dbManager = DatabaseManager.getInstance();
 const db = dbManager.getSequelize();
 
-interface PriceAttributes {
-  id?: string;
-  symbol: string;
-  label: string | null;
-  network: string | null;
-  isGas: boolean;
-  address: string | null;
-  priceUSD: number | null;
-  source: string;
-  sourceIdentifier: string | null;
-  updatedAt: number | null;
-  updatedAtDisplay: string | null;
-  symbolDisplay: string | null;
-  labelDisplay: string | null;
-  networkDisplay: string | null;
-};
+// interface PriceAttributes {
+//   id?: string;
+//   symbol: string;
+//   label: string | null;
+//   network: string | null;
+//   isGas: boolean;
+//   address: string | null;
+//   priceUSD: number | null;
+//   source: string;
+//   sourceIdentifier: string | null;
+//   updatedAt: number | null;
+//   updatedAtDisplay: string | null;
+//   symbolDisplay: string | null;
+//   labelDisplay: string | null;
+//   networkDisplay: string | null;
+// };
 
-export interface DisguiseInput extends Optional<PriceAttributes, 'id'> {};
-export interface DisguiseOutput extends Required<PriceAttributes> {};
+// export interface DisguiseInput extends Optional<PriceAttributes, 'id', 'symbol'> {};
+// export interface DisguiseOutput extends Required<PriceAttributes> {};
 
-class Price extends Model<PriceAttributes> {
+class Price extends Model {
   public id?: string;
   public symbol: string;
   public label: string | null;
@@ -39,7 +39,7 @@ class Price extends Model<PriceAttributes> {
   public source: string;
   public sourceIdentifier: string | null;
   public updatedAt: number | null;
-  public updatedAtDisplay: string | null;
+  public updatedAtDisplay: string 
   public symbolDisplay: string | null;
   public labelDisplay: string | null;
   public networkDisplay: string | null;
