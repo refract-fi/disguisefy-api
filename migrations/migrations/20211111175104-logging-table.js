@@ -11,7 +11,8 @@ module.exports = {
      await queryInterface.createTable('Logs', {
         id: {
           type: Sequelize.DataTypes.INTEGER,
-          allowNull: false
+          allowNull: false,
+          primaryKey: true
         },
         level: {
           type: Sequelize.DataTypes.STRING,

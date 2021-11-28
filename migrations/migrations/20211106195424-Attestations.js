@@ -4,7 +4,8 @@ module.exports = {
     await queryInterface.createTable('Attestations', {
       id: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: false,
+        primaryKey: true
       },
       name: {
         type: Sequelize.STRING,
