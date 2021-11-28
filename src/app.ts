@@ -33,7 +33,7 @@ class App {
 
     async start() {
         await this.dbManager.init();
-        this.cronManager.run('1 * * * * * ', 'gasPriceUpdater');
+        this.cronManager.run('3 * * * * * ', 'gasPriceUpdater');
         
         this.api.use(cors({
             origin: '*'
