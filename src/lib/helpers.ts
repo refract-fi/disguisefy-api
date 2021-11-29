@@ -133,7 +133,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
-                protocol: asset.protocolDisplay || '',
+                protocol: asset.appId || '',
                 label: asset.label || asset.symbol,
                 img: asset.img,
             });
@@ -144,7 +144,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
-                protocol: asset.protocolDisplay || '',
+                protocol: asset.appId || 'wallet',
                 label: asset.label || asset.symbol,
                 img: asset.img,
                 network: asset.network
@@ -156,7 +156,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
-                protocol: asset.protocolDisplay || '',
+                protocol: asset.appId || '',
                 label: asset.label || asset.symbol,
                 img: asset.img,
                 tokens: asset.tokens || [],
@@ -173,7 +173,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                         address: assetToken.address,
                         symbol: assetToken.symbol,
                         balance: assetToken.balanceUSD,
-                        protocol: asset.protocolDisplay || '',
+                        protocol: asset.appId || '',
                         label: assetToken.label || assetToken.symbol,
                         img: assetToken.img
                     });
@@ -187,7 +187,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
-                protocol: asset.collectionName || asset.location?.protocolDisplay || '',
+                protocol: asset.collectionName || asset.location?.appId || '',
                 label: asset.collectionName || asset.symbol,
                 img: asset.collectionImg
             });
@@ -198,7 +198,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
-                protocol: asset.location?.protocolDisplay || '',
+                protocol: asset.location?.appId || '',
                 label: asset.label || asset.symbol,
                 img: extractAssetImg(asset, asset.category)
             });
@@ -216,7 +216,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
-                protocol: asset.protocolDisplay,
+                protocol: asset.appId,
                 label: asset.label || asset.symbol,
                 tokens: asset.tokens
             });
@@ -228,7 +228,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                     address: asset.address,
                     symbol: asset.symbol,
                     balance: asset.balanceUSD,
-                    protocol: asset.location?.protocolDisplay || '',
+                    protocol: asset.location?.appId || '',
                     label: asset.label || asset.symbol,
                     img: extractAssetImg(asset, asset.category)
                 });
@@ -248,7 +248,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                     address: asset.address,
                     symbol: asset.symbol,
                     balance: asset.balanceUSD,
-                    protocol: asset.location?.protocolDisplay || '',
+                    protocol: asset.location?.appId || '',
                     label: asset.label || asset.symbol,
                     tokens: assetTokens
                 });
@@ -265,14 +265,14 @@ export function extractTokens(asset: IAsset): IToken[] {
                 if(assetTokens && assetTokens.length > 0) {
                     for(let assetToken of assetTokens) {
                         assetToken.img = `${protocolImgBase}${asset.appId}.png`;
-                        assetToken.protocol = asset.protocolDisplay;
+                        assetToken.protocol = asset.appId;
 
                         tokens.push({
                             address: assetToken.address,
                             symbol: assetToken.symbol,
                             metaType: assetToken.metaType,
                             balance: assetToken.balanceUSD,
-                            protocol: asset.protocolDisplay || asset.location?.protocolDisplay || '',
+                            protocol: asset.appId || asset.location?.appId || '',
                             label: assetToken.label || assetToken.symbol || symbol,
                             img: assetToken.img,
                             tokens: assetToken.tokens

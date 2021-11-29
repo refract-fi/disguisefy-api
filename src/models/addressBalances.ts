@@ -16,7 +16,9 @@ export default class AddressBalances {
         this.percentages = {};
         this.assets = assets;
         this.assetsPercentages = {};
-        this.stats = {};
+        this.stats = {
+            gasTokenPercentages: {}
+        };
 
         if (options?.ignoreNFTs) {
             Preset.removeNFTs(this);
@@ -117,7 +119,8 @@ export default class AddressBalances {
         let totalBnb: number = 0;
         let totalCelo: number = 0;
         let totalOne: number = 0;
-        let gasTokens = ['eth', 'matic', 'ftm', 'xdai', 'bnb', 'celo', 'one']
+        let totalOther: number = 0;
+        let gasTokens = ['eth', 'matic', 'ftm', 'xdai', 'bnb', 'celo', 'one', 'other']
 
         gasTokens.map((gasToken) => {
             let totalGasToken: number = 0;
@@ -175,6 +178,9 @@ export default class AddressBalances {
                 case "one":
                     totalOne = totalGasToken
                     break;
+                case "other":
+                    totalOther = total - (totalEth + totalMatic + totalFtm + totalxdai + totalBnb + totalCelo + totalOne)
+                    break;
                 default:
                     console.log("[ERROR]: invalid gas token: " + gasToken)
             }
@@ -183,15 +189,79 @@ export default class AddressBalances {
         this.stats = {
             ...this.stats,
             gasTokenPercentages: {
-                eth: totalEth / total * 100,
-                matic: totalMatic / total * 100,
-                ftm: totalFtm / total * 100,
-                xdai: totalxdai / total * 100,
-                bnb: totalBnb / total * 100,
-                celo: totalCelo / total * 100,
-                one: totalOne / total * 100
+                eth: {
+                    title: 'ETH',
+                    color: '#3498db',
+                    percentage: totalEth / total * 100
+                },
+                matic: {
+                    title: 'MATIC',
+                    color: "#8247e5",
+                    percentage: totalMatic / total * 100
+                },
+                ftm: {
+                    title: 'FTM',
+                    color: "#0150e3",
+                    percentage: totalFtm / total * 100
+                },
+                xdai: {
+                    title: 'XDAI',
+                    color: "#f6c14d",
+                    percentage:totalxdai / total * 100
+                },
+                bnb: {
+                    title: 'BNB',
+                    color: "#FBDA3C",
+                    percentage: totalBnb / total * 100
+                },
+                celo: {
+                    title: 'CELO',
+                    color: '#5ace82',
+                    percentage: totalCelo / total * 100
+                },
+                one: {
+                    title: 'ONE',
+                    color: '#40a9e6',
+                    percentage: totalOne / total * 100
+                },
+                other: {
+                    title: 'Other Assets',
+                    color: '#ecf3ff',
+                    percentage: totalOther / total * 100
+                }
             }
-
+        }
+        if(totalEth === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.eth
+        }
+        if(totalMatic === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.matic
+        }
+        if(totalFtm === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.ftm
+        }
+        if(totalxdai === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.xdai
+        }
+        if(totalBnb === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.bnb
+        }
+        if(totalCelo === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.celo
+        }
+        if(totalOne === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.one
+        }
+        if(totalOther === 0){
+            //@ts-ignore
+            delete this.stats.gasTokenPercentages.other
         }
     }
 
@@ -224,34 +294,42 @@ export default class AddressBalances {
         }
     }
     calcProtocolPercentages(options: DisguiseOptions | null) {
-        let totals: any = {
+        let protocolBalances: any = {}
+        let protocolPercentages: any = {}
+        let total: number = 0
 
-        }
         for (let [category, assetList] of Object.entries(this.assets)) {
             if (category !== 'debt' && category !== 'nft') {
                 for (let [token, details] of (Object.entries(assetList))) {
                     let detailsArray: any = details
                     detailsArray.map((asset: any) => {
-                        if(!totals[asset.protocol]){
-                            if(asset.protocol === ''){
-                                totals.wallet = 0
+                        if(!protocolBalances[asset.protocol]){
+                            if(asset.protocol === 'wallet'){
+                                // protocolBalances.wallet = 0
                             } else {
-                                totals[asset.protocol] = 0
+                                protocolBalances[asset.protocol] = 0
                             }
                         }
-                        if(asset.protocol === ''){
-                            totals.wallet += asset.balance
+                        if(asset.protocol === 'wallet'){
+                            // protocolBalances.wallet += asset.balance
                         }else {
-                            totals[asset.protocol] += asset.balance
+                            protocolBalances[asset.protocol] += asset.balance
+                            total += asset.balance
                         }
                     })
                 }
             }
         }
-        // this.stats = {
-        //     ...this.stats,
-        //     protocolPercentages: totals
-        // }
+
+        for(let [protocol, balance] of Object.entries(protocolBalances)){
+            let bal: any = balance
+            protocolPercentages[protocol] =  bal/total
+        }
+        
+        this.stats = {
+            ...this.stats,
+            protocolPercentages: protocolPercentages,
+        }
     }
 
     calcImpermanentVulnerability(options: DisguiseOptions | null) {
