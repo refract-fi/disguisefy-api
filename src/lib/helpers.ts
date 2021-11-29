@@ -75,6 +75,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
             if(asset.address == ROOT_ADDRESS) {
                 assets[key][asset.address].push(token);
+                balances[key] += token.balance;
             } else {
                 let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
                 if(foundToken) {
@@ -109,6 +110,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             for(let token of tokens) { token.network = currentNetwork; }
             assets[key][asset.address] = tokens;
             balances[key] += asset.balanceUSD;
+            
         }
     }
 }
@@ -133,7 +135,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
-                img: asset.img
+                img: asset.img,
             });
             break;
 
@@ -144,7 +146,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
-                img: asset.img
+                img: asset.img,
+                network: asset.network
             });
             break;
 
@@ -156,6 +159,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 protocol: asset.protocolDisplay || '',
                 label: asset.label || asset.symbol,
                 img: asset.img,
+                tokens: asset.tokens || [],
                 protocolImg: `${protocolImgBase}${asset.appId}.png`
             });
             break;
@@ -270,7 +274,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                             balance: assetToken.balanceUSD,
                             protocol: asset.protocolDisplay || asset.location?.protocolDisplay || '',
                             label: assetToken.label || assetToken.symbol || symbol,
-                            img: assetToken.img
+                            img: assetToken.img,
+                            tokens: assetToken.tokens
                         });
                     }
                 }
