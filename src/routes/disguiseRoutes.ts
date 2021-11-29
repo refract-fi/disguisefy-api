@@ -40,6 +40,18 @@ disguiseRoutes.get('/coins/gas/prices', async ctx=> {
     }
 });
 
+disguiseRoutes.get('/coins/gas/prices/update', async ctx=> {
+    try {
+        let prices = await CoinGeckoApi.updateGasCoinsPrices();
+
+        ctx.body = prices;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
 disguiseRoutes.get('/coins/gas/prices/init', async ctx=> {
     try {
         let status = await CoinGeckoApi.initGasCoinsPrices();
