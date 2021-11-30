@@ -22,4 +22,5 @@ export default interface IToken {
     supply?: number;
     volume?: number;
     network?: string;
+    productLabel?: string;
 }

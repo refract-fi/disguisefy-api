@@ -187,7 +187,7 @@ class ZapperApi {
                                 if (asset.hide) {
                                     // do nothing
                                 } else {
-                                    addAsset(assets, assetCategory, asset, balances, currentNetwork);
+                                    addAsset(assets, assetCategory, asset, balances, currentNetwork, product.label);
                                 }
                             }
                         }

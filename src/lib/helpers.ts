@@ -66,9 +66,9 @@ export function isJSON(text: any) {
     }
 }
 
-export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any, currentNetwork: string) {
+export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any, currentNetwork: string, productLabel: string) {
     let key = String(assetCategory);
-    let tokens: IToken[] = extractTokens(asset);
+    let tokens: IToken[] = extractTokens(asset, productLabel);
 
     if(assets[key].hasOwnProperty(asset.address)) {
         for(let token of tokens) {
@@ -110,7 +110,6 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             for(let token of tokens) { token.network = currentNetwork; }
             assets[key][asset.address] = tokens;
             balances[key] += asset.balanceUSD;
-            
         }
     }
 }
@@ -125,7 +124,7 @@ export function addToken(assets: any, assetCategory: AssetCategories, token: ITo
     }
 }
 
-export function extractTokens(asset: IAsset): IToken[] {
+export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
     let tokens: IToken[] = [];
     switch(asset.category) {
         case "debt":
@@ -136,6 +135,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                 protocol: asset.appId || '',
                 label: asset.label || asset.symbol,
                 img: asset.img,
+                productLabel: productLabel
             });
             break;
 
@@ -147,7 +147,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                 protocol: asset.appId || 'wallet',
                 label: asset.label || asset.symbol,
                 img: asset.img,
-                network: asset.network
+                network: asset.network,
+                productLabel: productLabel
             });
             break;
 
@@ -160,7 +161,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                 label: asset.label || asset.symbol,
                 img: asset.img,
                 tokens: asset.tokens || [],
-                protocolImg: `${protocolImgBase}${asset.appId}.png`
+                protocolImg: `${protocolImgBase}${asset.appId}.png`,
+                productLabel: productLabel
             });
             break;
 
@@ -175,7 +177,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                         balance: assetToken.balanceUSD,
                         protocol: asset.appId || '',
                         label: assetToken.label || assetToken.symbol,
-                        img: assetToken.img
+                        img: assetToken.img,
+                        productLabel: productLabel
                     });
                 }
             }
@@ -200,7 +203,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.location?.appId || '',
                 label: asset.label || asset.symbol,
-                img: extractAssetImg(asset, asset.category)
+                img: extractAssetImg(asset, asset.category),
+                productLabel: productLabel
             });
             break;
         
@@ -211,14 +215,14 @@ export function extractTokens(asset: IAsset): IToken[] {
                     assetToken.img = extractAssetImg(assetToken, asset.category);
                 }
             }
-            
             tokens.push({
                 address: asset.address,
                 symbol: asset.symbol,
                 balance: asset.balanceUSD,
                 protocol: asset.appId,
                 label: asset.label || asset.symbol,
-                tokens: asset.tokens
+                tokens: asset.tokens,
+                productLabel: productLabel
             });
             break;
 
@@ -230,7 +234,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                     balance: asset.balanceUSD,
                     protocol: asset.location?.appId || '',
                     label: asset.label || asset.symbol,
-                    img: extractAssetImg(asset, asset.category)
+                    img: extractAssetImg(asset, asset.category),
+                    productLabel: productLabel
                 });
             } else if(asset.type == 'pool') {
                 let assetTokens = asset.tokens;
@@ -250,7 +255,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                     balance: asset.balanceUSD,
                     protocol: asset.location?.appId || '',
                     label: asset.label || asset.symbol,
-                    tokens: assetTokens
+                    tokens: assetTokens,
+                    productLabel: productLabel
                 });
             } else if(asset.type == 'farm') {
                 let assetTokens = asset.tokens;
@@ -266,6 +272,7 @@ export function extractTokens(asset: IAsset): IToken[] {
                     for(let assetToken of assetTokens) {
                         assetToken.img = `${protocolImgBase}${asset.appId}.png`;
                         assetToken.protocol = asset.appId;
+                        assetToken.productLabel = productLabel
 
                         tokens.push({
                             address: assetToken.address,
@@ -275,7 +282,8 @@ export function extractTokens(asset: IAsset): IToken[] {
                             protocol: asset.appId || asset.location?.appId || '',
                             label: assetToken.label || assetToken.symbol || symbol,
                             img: assetToken.img,
-                            tokens: assetToken.tokens
+                            tokens: assetToken.tokens,
+                            productLabel: assetToken.productLabel
                         });
                     }
                 }

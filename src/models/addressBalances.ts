@@ -106,7 +106,7 @@ export default class AddressBalances {
 
         this.calcGasPercentages(options, total)
         this.calcNetworkPercentages(options);
-        this.calcProtocolPercentages(options);
+        this.calcProtocolPercentages(options, total);
         this.calcImpermanentVulnerability(options);
     }
 
@@ -267,8 +267,59 @@ export default class AddressBalances {
 
     calcNetworkPercentages(options: DisguiseOptions | null) {
         let networkTotals: any = {}
-        let test: any = 0
-        let networkPercentages: any = {}
+        let total: any = 0
+        let networkPercentages: any = {
+            ethereum : {
+                title: 'Ethereum',
+                color: "blue",
+                percentage: 0
+            },
+            polygon : {
+                title: 'Polygon',
+                color: "Purple",
+                percentage: 0
+            },
+            fantom: {
+                title: 'Fantom',
+                color: 'Orange',
+                percentage: 0
+            },
+            "binance-smart-chain": {
+                title: 'BSC',
+                color: 'yellow',
+                percentage: 0
+            },
+            optimism: {
+                title: 'Optimism',
+                color: 'Red',
+                percentage: 0
+            },
+            xdai: {
+                title: 'xDai',
+                color: 'yellow',
+                percentage: 0
+            },
+            avalanche: {
+                title: 'Avalanche',
+                color: 'orange',
+                percentage: 0
+            },
+            arbitrum: {
+                title: 'Arbitrum',
+                color: 'blue',
+                percentage: 0
+            },
+            celo: {
+                title: 'Celo',
+                color: 'orange',
+                percentage: 0
+            },
+            harmony: {
+                title: 'Harmony',
+                color: 'black',
+                percentage: 0
+            }
+        }
         for (let [category, assetList] of Object.entries(this.assets)) {
             if ((category !== 'debt' && category !== 'nft')) {
                 for (let [token, details] of (Object.entries(assetList))) {
@@ -278,14 +329,20 @@ export default class AddressBalances {
                             networkTotals[asset.network] = 0
                         }
                         networkTotals[asset.network] += asset.balance
-                        test += asset.balance
+                        total += asset.balance
                     })
                 }
             }
         }
         for(let [network, networkTotal] of Object.entries(networkTotals)){
             let networkAmount: any = networkTotal
-            networkPercentages[network] = networkAmount/ test
+            networkPercentages[network].percentage = networkAmount / total * 100
+        }
+        for(let [network, networkDetails] of Object.entries(networkPercentages)){
+            //@ts-ignore
+            if(networkDetails.percentage === 0){
+                delete networkPercentages[network]
+            }
         }
 
         this.stats = {
@@ -293,10 +350,9 @@ export default class AddressBalances {
             networkPercentages: networkPercentages
         }
     }
-    calcProtocolPercentages(options: DisguiseOptions | null) {
+    calcProtocolPercentages(options: DisguiseOptions | null, total: number) {
         let protocolBalances: any = {}
         let protocolPercentages: any = {}
-        let total: number = 0
 
         for (let [category, assetList] of Object.entries(this.assets)) {
             if (category !== 'debt' && category !== 'nft') {
@@ -307,29 +363,44 @@ export default class AddressBalances {
                             if(asset.protocol === 'wallet'){
                                 // protocolBalances.wallet = 0
                             } else {
+                                console.log(asset.productLabel)
                                 protocolBalances[asset.protocol] = 0
+                                protocolPercentages = {...protocolPercentages, [asset.protocol]: {percentage: 0, title: asset.productLabel}}
                             }
                         }
                         if(asset.protocol === 'wallet'){
                             // protocolBalances.wallet += asset.balance
                         }else {
                             protocolBalances[asset.protocol] += asset.balance
+                            // let newBalance: number = protocolBalances[asset.protocol].balance + asset.balance
+                            // protocolPercentages = {...protocolPercentages, [asset.protocol]: {...[asset.protocol], percentage: 0}}
                             total += asset.balance
                         }
                     })
                 }
             }
         }
+        let otherPercent: number = 100
 
         for(let [protocol, balance] of Object.entries(protocolBalances)){
             let bal: any = balance
-            protocolPercentages[protocol] =  bal/total
+            // protocolPercentages[protocol] =  bal/total * 100
+            otherPercent -= bal/total * 100
+            protocolPercentages[protocol].percentage = bal/total * 100
+        }
+
+        // protocolPercentages.otherPercent = otherPercent
+        protocolPercentages.other = {
+            title: 'Not locked in a protocol',
+            percentage: otherPercent
         }
         
         this.stats = {
             ...this.stats,
-            protocolPercentages: protocolPercentages,
+            // protocolPercentages: protocolPercentages,
+            protocolPercentages: protocolPercentages
         }
+        
     }
 
     calcImpermanentVulnerability(options: DisguiseOptions | null) {
