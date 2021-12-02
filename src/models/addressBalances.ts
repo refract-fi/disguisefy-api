@@ -191,7 +191,7 @@ export default class AddressBalances {
             gasTokenPercentages: {
                 eth: {
                     title: 'ETH',
-                    color: '#3498db',
+                    color: '#ccaff8',
                     percentage: totalEth / total * 100
                 },
                 matic: {
@@ -231,35 +231,43 @@ export default class AddressBalances {
                 }
             }
         }
-        if(totalEth === 0){
+
+        if(totalEth / total * 100 <= 0.1){
+            totalOther += totalEth / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.eth
         }
-        if(totalMatic === 0){
+        if(totalMatic / total * 100 <= 0.1){
+            totalOther += totalMatic / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.matic
         }
-        if(totalFtm === 0){
+        if(totalFtm / total * 100 <= 0.1){
+            totalOther += totalFtm / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.ftm
         }
-        if(totalxdai === 0){
+        if(totalxdai / total * 100 <= 0.1){
+            totalOther += totalxdai / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.xdai
         }
-        if(totalBnb === 0){
+        if(totalBnb / total * 100 <= 0.1){
+            totalOther += totalBnb / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.bnb
         }
-        if(totalCelo === 0){
+        if(totalCelo / total * 100 <= 0.1){
+            totalOther += totalCelo / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.celo
         }
-        if(totalOne === 0){
+        if(totalOne / total * 100 <= 0.1){
+            totalOther += totalOne / total * 100
             //@ts-ignore
             delete this.stats.gasTokenPercentages.one
         }
-        if(totalOther === 0){
+        if(totalOther / total * 100 <= 0.1){
             //@ts-ignore
             delete this.stats.gasTokenPercentages.other
         }
@@ -271,54 +279,60 @@ export default class AddressBalances {
         let networkPercentages: any = {
             ethereum : {
                 title: 'Ethereum',
-                color: "blue",
+                color: "#ccaff8",
                 percentage: 0
             },
             polygon : {
                 title: 'Polygon',
-                color: "Purple",
+                color: "#8247e5",
                 percentage: 0
             },
             fantom: {
                 title: 'Fantom',
-                color: 'Orange',
+                color: '#0150e3',
                 percentage: 0
             },
             "binance-smart-chain": {
                 title: 'BSC',
-                color: 'yellow',
+                color: '#FBDA3C',
                 percentage: 0
             },
             optimism: {
                 title: 'Optimism',
-                color: 'Red',
+                color: '#ff0420',
                 percentage: 0
             },
             xdai: {
                 title: 'xDai',
-                color: 'yellow',
+                color: '#f6c14d',
                 percentage: 0
             },
             avalanche: {
                 title: 'Avalanche',
-                color: 'orange',
+                color: '#e84142',
                 percentage: 0
             },
             arbitrum: {
                 title: 'Arbitrum',
-                color: 'blue',
+                color: '#28a0f0',
                 percentage: 0
             },
             celo: {
                 title: 'Celo',
-                color: 'orange',
+                color: '#5ace82',
                 percentage: 0
             },
             harmony: {
                 title: 'Harmony',
-                color: 'black',
+                color: '#40a9e6',
                 percentage: 0
-            }
+            },
+            other: {
+                title: 'Other Networks',
+                color: 'white',
+                percentage: 0,
+                // networks: []
+            },
         }
         for (let [category, assetList] of Object.entries(this.assets)) {
             if ((category !== 'debt' && category !== 'nft')) {
@@ -334,10 +348,17 @@ export default class AddressBalances {
                 }
             }
         }
+        let otherTotal: number = 0
         for(let [network, networkTotal] of Object.entries(networkTotals)){
             let networkAmount: any = networkTotal
-            networkPercentages[network].percentage = networkAmount / total * 100
+            if(networkAmount / total * 100 > 0.1){
+                networkPercentages[network].percentage = networkAmount / total * 100
+            } else {
+                otherTotal += networkAmount / total * 100
+                // networkPercentages.other.networks.push(network)
+            }
         }
+        networkPercentages.other.percentage = otherTotal
         for(let [network, networkDetails] of Object.entries(networkPercentages)){
             //@ts-ignore
             if(networkDetails.percentage === 0){
@@ -374,25 +395,37 @@ export default class AddressBalances {
                             protocolBalances[asset.protocol] += asset.balance
                             // let newBalance: number = protocolBalances[asset.protocol].balance + asset.balance
                             // protocolPercentages = {...protocolPercentages, [asset.protocol]: {...[asset.protocol], percentage: 0}}
-                            total += asset.balance
+                            // total += asset.balance
                         }
                     })
                 }
             }
         }
-        let otherPercent: number = 100
+        let notLocked: number = 100
+        let otherPercent: number = 0
 
         for(let [protocol, balance] of Object.entries(protocolBalances)){
             let bal: any = balance
+            notLocked -= bal/total * 100
+            if(bal/total * 100 >= 0.1){
+                protocolPercentages[protocol].percentage = bal/total * 100
+            }else{
+                otherPercent += bal/total * 100
+                delete protocolPercentages[protocol]
+            }
             // protocolPercentages[protocol] =  bal/total * 100
-            otherPercent -= bal/total * 100
-            protocolPercentages[protocol].percentage = bal/total * 100
         }
 
         // protocolPercentages.otherPercent = otherPercent
         protocolPercentages.other = {
-            title: 'Not locked in a protocol',
+            title: 'Other Assets Locked',
             percentage: otherPercent
+        }
+
+        protocolPercentages.notLocked = {
+            title: 'Not locked in a protocol',
+            percentage: notLocked,
+            color: 'white'
         }
         
         this.stats = {
