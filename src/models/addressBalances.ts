@@ -51,15 +51,26 @@ export default class AddressBalances {
         for (let [assetCategory, assetsList] of Object.entries(this.assetsPercentages)) {
             let assets = Object.values(assetsList);
             for (let [assetAddress, currentAsset] of Object.entries(assetsList)) {
-                // prevents similar assets to delete each other
-                if (!marked.includes(currentAsset.address)) {
-                    // find asset with same label but different address, likely similar asset ported to an other chain
-                    let similarAssetIndex = assets.findIndex(asset => asset.label == currentAsset.label && asset.address != currentAsset.address);
-
-                    if (similarAssetIndex > -1) {
-                        currentAsset.percentage += assets[similarAssetIndex].percentage;
-                        marked.push(assets[similarAssetIndex].address);
-                        delete this.assetsPercentages[assetCategory][assets[similarAssetIndex].address];
+                if(assetCategory !== 'wallet'){
+                    // prevents similar assets to delete each other
+                    if (!marked.includes(currentAsset.address)) {
+                        // find asset with same label but different address, likely similar asset ported to an other chain
+                        let similarAssetIndex = assets.findIndex(asset => asset.label == currentAsset.label && asset.address != currentAsset.address);
+                        
+                        if (similarAssetIndex > -1) {
+                            currentAsset.percentage += assets[similarAssetIndex].percentage;
+                            marked.push(assets[similarAssetIndex].address);
+                            delete this.assetsPercentages[assetCategory][assets[similarAssetIndex].address];
+                        }
+                    }
+                } else {
+                    if(!marked.includes(currentAsset.address)){
+                        let similarAssetIndex = assets.findIndex(asset => asset.label == currentAsset.label && asset.address !== currentAsset.address)
+                        if(similarAssetIndex > -1){
+                            currentAsset.percentage += assets[similarAssetIndex].percentage;
+                            marked.push(assets[similarAssetIndex].address);
+                            delete this.assetsPercentages[assetCategory][`${assets[similarAssetIndex].label}-${assets[similarAssetIndex].network}`]
+                        }
                     }
                 }
             }

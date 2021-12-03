@@ -82,15 +82,12 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
                 if(foundToken) {
                     foundToken.balance += token.balance;
                     balances[key] += token.balance;
-                    console.log('[addAsset]: looks weird 1');
                 } else {
                     console.log('[addAsset]: should not happen.');
                 }
                 assets[key][asset.address].balance += asset.balanceUSD;
             }
         }
-        
-        console.log('[addAsset]: looks weird 2');
     } else {
         if((asset.type == 'farm' || asset.type == 'claimable') && asset.tokens && asset.tokens.length > 0) {
             for(let token of tokens) {
@@ -150,7 +147,7 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.appId || 'wallet',
                 label: asset.label || asset.symbol,
-                img: asset.img,
+                img: `https://storage.googleapis.com/zapper-fi-assets/tokens/${asset.network}/${asset.address}.png`,
                 network: asset.network,
                 productLabel: productLabel
             });
@@ -163,7 +160,7 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
                 balance: asset.balanceUSD,
                 protocol: asset.appId || '',
                 label: asset.label || asset.symbol,
-                img: asset.img,
+                img: `https://storage.googleapis.com/zapper-fi-assets/tokens/${asset.network}/${asset.address}.png`,
                 tokens: asset.tokens || [],
                 protocolImg: `${protocolImgBase}${asset.appId}.png`,
                 productLabel: productLabel
