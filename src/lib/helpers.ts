@@ -69,19 +69,12 @@ export function isJSON(text: any) {
 export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any, currentNetwork: string, productLabel: string) {
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset, productLabel);
-    // if(asset.category === 'wallet'){
-    //     if(asset.symbol === 'ETH'){
-    //         if(asset.network === 'polygon'){
-    //         console.log('test')
-    //         }
-    //     }
-    // }
 
     if(assets[key].hasOwnProperty(asset.address) || (assets[key].hasOwnProperty(asset.symbol) && asset.category === 'wallet')) {
         for(let token of tokens) {
             // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
             if(asset.address == ROOT_ADDRESS || asset.category === 'wallet') {
-                let foundToken = assets[key][asset.symbol].find((element: any) => element.symbol == token.symbol);
+                let foundToken = assets[key][`${asset.symbol}-${asset.network}`].find((element: any) => element.symbol == token.symbol);
                 foundToken.balance += token.balance;
                 balances[key] += token.balance;
             } else {
@@ -116,7 +109,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
         } else {
             for(let token of tokens) { token.network = currentNetwork; }
             if(asset.category === 'wallet'){
-                assets[key][asset.symbol] = tokens;
+                assets[key][`${asset.symbol}-${asset.network}`] = tokens;
             }else {
                 assets[key][asset.address] = tokens;
             }
