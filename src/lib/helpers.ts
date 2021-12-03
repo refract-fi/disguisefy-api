@@ -69,27 +69,34 @@ export function isJSON(text: any) {
 export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any, currentNetwork: string, productLabel: string) {
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset, productLabel);
+    // if(asset.category === 'wallet'){
+    //     if(asset.symbol === 'ETH'){
+    //         if(asset.network === 'polygon'){
+    //         console.log('test')
+    //         }
+    //     }
+    // }
 
-    if(assets[key].hasOwnProperty(asset.address)) {
+    if(assets[key].hasOwnProperty(asset.address) || (assets[key].hasOwnProperty(asset.symbol) && asset.category === 'wallet')) {
         for(let token of tokens) {
             // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
-            if(asset.address == ROOT_ADDRESS) {
-                assets[key][asset.address].push(token);
+            if(asset.address == ROOT_ADDRESS || asset.category === 'wallet') {
+                let foundToken = assets[key][asset.symbol].find((element: any) => element.symbol == token.symbol);
+                foundToken.balance += token.balance;
                 balances[key] += token.balance;
             } else {
                 let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
                 if(foundToken) {
                     foundToken.balance += token.balance;
                     balances[key] += token.balance;
-    
                     console.log('[addAsset]: looks weird 1');
                 } else {
                     console.log('[addAsset]: should not happen.');
                 }
+                assets[key][asset.address].balance += asset.balanceUSD;
             }
         }
         
-        assets[key][asset.address].balance += asset.balanceUSD;
         console.log('[addAsset]: looks weird 2');
     } else {
         if((asset.type == 'farm' || asset.type == 'claimable') && asset.tokens && asset.tokens.length > 0) {
@@ -108,7 +115,11 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             }
         } else {
             for(let token of tokens) { token.network = currentNetwork; }
-            assets[key][asset.address] = tokens;
+            if(asset.category === 'wallet'){
+                assets[key][asset.symbol] = tokens;
+            }else {
+                assets[key][asset.address] = tokens;
+            }
             balances[key] += asset.balanceUSD;
         }
     }

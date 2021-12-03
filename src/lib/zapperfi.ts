@@ -174,6 +174,9 @@ class ZapperApi {
                                     asset.category = asset.type;
                                 }
                             }
+                            if(asset.category == 'base'){
+                                asset.category = 'wallet'
+                            }
 
                             if (asset.category == 'staked' || asset.category == 'farm') {
                                 // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
