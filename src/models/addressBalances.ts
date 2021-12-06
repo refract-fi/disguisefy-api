@@ -47,6 +47,7 @@ export default class AddressBalances {
 
     groupAssetsByLabel() {
         let marked: string[] = [];
+        let multichainAssets: string[] = [];
 
         for (let [assetCategory, assetsList] of Object.entries(this.assetsPercentages)) {
             let assets = Object.values(assetsList);
@@ -64,11 +65,11 @@ export default class AddressBalances {
                         }
                     }
                 } else {
-                    if(!marked.includes(currentAsset.address)){
-                        let similarAssetIndex = assets.findIndex(asset => asset.label == currentAsset.label && asset.address !== currentAsset.address)
+                    if(!multichainAssets.includes(`${currentAsset.label}-${currentAsset.network}`)){
+                        let similarAssetIndex = assets.findIndex(asset => asset.label == currentAsset.label && `${asset.label}-${asset.network}` !== `${currentAsset.label}-${currentAsset.network}`)
                         if(similarAssetIndex > -1){
                             currentAsset.percentage += assets[similarAssetIndex].percentage;
-                            marked.push(assets[similarAssetIndex].address);
+                            multichainAssets.push(`${assets[similarAssetIndex].label}-${currentAsset.network}`);
                             delete this.assetsPercentages[assetCategory][`${assets[similarAssetIndex].label}-${assets[similarAssetIndex].network}`]
                         }
                     }

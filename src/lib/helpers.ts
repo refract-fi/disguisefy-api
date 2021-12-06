@@ -70,13 +70,13 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset, productLabel);
 
-    if(assets[key].hasOwnProperty(asset.address) || (assets[key].hasOwnProperty(asset.symbol) && asset.category === 'wallet')) {
+    if(assets[key].hasOwnProperty(asset.address) || (assets[key].hasOwnProperty(`${asset.symbol}-${asset.network}`) && asset.category === 'wallet')) {
         for(let token of tokens) {
             // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
             if(asset.address == ROOT_ADDRESS || asset.category === 'wallet') {
                 let foundToken = assets[key][`${asset.symbol}-${asset.network}`].find((element: any) => element.symbol == token.symbol);
-                foundToken.balance += token.balance;
-                balances[key] += token.balance;
+                    foundToken.balance += token.balance;
+                    balances[key] += token.balance;
             } else {
                 let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
                 if(foundToken) {

@@ -176,7 +176,12 @@ class ZapperApi {
                             }
                             if(asset.category == 'base'){
                                 asset.category = 'wallet'
+                                if(asset.symbol == 'ETH'){
+                                    console.log('hey')
+                                }
                             }
+
+
 
                             if (asset.category == 'staked' || asset.category == 'farm') {
                                 // https://github.com/disguisefy/disguisefy-api/projects/1#card-68794734
