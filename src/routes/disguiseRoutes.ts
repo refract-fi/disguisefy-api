@@ -64,33 +64,33 @@ disguiseRoutes.get('/coins/gas/prices/init', async ctx=> {
     }
 });
 
-disguiseRoutes.get('/transactions/gas', async ctx => {
-    let { addresses, chains } = ctx.request.body;
+// disguiseRoutes.get('/transactions/gas', async ctx => {
+//     let { addresses, chains } = ctx.request.body;
 
-    try {
-        let gasContrainer = await ZapperApi.getTransactionsGas(addresses, chains);
+//     try {
+//         let gasContrainer = await ZapperApi.getTransactionsGas(addresses, chains);
 
-        ctx.body = gasContrainer;
-    } catch(e) {
-        console.log(e);
-        ctx.status = 500;
-        ctx.body = e;
-    }
-});
+//         ctx.body = gasContrainer;
+//     } catch(e) {
+//         console.log(e);
+//         ctx.status = 500;
+//         ctx.body = e;
+//     }
+// });
 
-disguiseRoutes.get('/transactions', async ctx => {
-    let { addresses, chains } = ctx.request.body;
+// disguiseRoutes.get('/transactions', async ctx => {
+//     let { addresses, chains } = ctx.request.body;
 
-    try {
-        let transactions = await ZapperApi.getTransactions(addresses, chains);
+//     try {
+//         let transactions = await ZapperApi.getTransactions(addresses, chains);
 
-        ctx.body = transactions;
-    } catch(e) {
-        console.log(e);
-        ctx.status = 500;
-        ctx.body = e;
-    }
-});
+//         ctx.body = transactions;
+//     } catch(e) {
+//         console.log(e);
+//         ctx.status = 500;
+//         ctx.body = e;
+//     }
+// });
 
 disguiseRoutes.post('/attestations/:url/sign', async ctx => {
     try {
