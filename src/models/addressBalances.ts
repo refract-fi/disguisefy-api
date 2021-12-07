@@ -16,9 +16,7 @@ export default class AddressBalances {
         this.percentages = {};
         this.assets = assets;
         this.assetsPercentages = {};
-        this.stats = {
-            gasTokenPercentages: {}
-        };
+        this.stats = {};
 
         if (options?.ignoreNFTs) {
             Preset.removeNFTs(this);
@@ -120,6 +118,10 @@ export default class AddressBalances {
         this.calcNetworkPercentages(options);
         this.calcProtocolPercentages(options, total);
         this.calcImpermanentVulnerability(options);
+    }
+
+    calcGas(options: DisguiseOptions | null, total: number){
+        
     }
 
     calcGasPercentages(options: DisguiseOptions | null, total: number) {

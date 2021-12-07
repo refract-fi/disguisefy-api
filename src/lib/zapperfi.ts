@@ -28,56 +28,55 @@ class ZapperApi {
 
     }
 
-    // static async getTransactionsGas(addresses: string[], chains: string[]) {
-    //     let addressGasContainers: any = {};
+    static async getTransactionsGas(addresses: string[], chains: string[]) {
+        let addressGasContainers: any = {};
 
-    //     for(let address of addresses) {
-    //         let gasContrainer: any = {};
+        for(let address of addresses) {
+            let gasContrainer: any = {};
 
-    //         for(let chain of chains) {
-    //             gasContrainer[chain] = 0;
-    //         }
+            for(let chain of chains) {
+                gasContrainer[chain] = 0;
+            }
 
-    //         addressGasContainers[address] = gasContrainer;
+            addressGasContainers[address] = gasContrainer;
 
-    //         let transactions = await ZapperApi.getTransactions([address], chains);
-    //         extractGas(transactions, gasContrainer);
-    //     }
+            let transactions = await ZapperApi.getTransactions([address], chains);
+            extractGas(transactions, gasContrainer);
+        }
 
-    //     for(let [address, gasTokens] of Object.entries(addressGasContainers)){
-    //         try{
-    //             //@ts-ignore
-    //             for(let [network, amount] of Object.entries(gasTokens)){
-    //                 let gasToken = await Price.findOne({
-    //                     where: {
-    //                         network: network
-    //                     }
-    //                 })
-    //                 if(!gasToken){
-    //                     // add throw error
-    //                 }
-    //                 //@ts-ignore
-    //                 addressGasContainers[address][`${network}USD`] = amount * gasToken?.priceUSD
-    //             }    
-    //         }catch(e){
-    //             console.log(e)
-    //         }
-    //     }
-    //     console.log(addressGasContainers)
-    //     return addressGasContainers;
-    // }
+        for(let [address, gasTokens] of Object.entries(addressGasContainers)){
+            try{
+                //@ts-ignore
+                for(let [network, amount] of Object.entries(gasTokens)){
+                    let gasToken = await Price.findOne({
+                        where: {
+                            network: network
+                        }
+                    })
+                    if(!gasToken){
+                        // add throw error
+                    }
+                    //@ts-ignore
+                    addressGasContainers[address][`${network}USD`] = amount * gasToken?.priceUSD
+                }    
+            }catch(e){
+                console.log(e)
+            }
+        }
+        return addressGasContainers;
+    }
 
-    // static async getTransactions(addresses: string[], chains: string[]) {
-    //     let promises = ZapperApi.transactionsPromiseGenerator(addresses, chains)
-    //     let responses = await Promise.all(promises);
-    //     let transactions = [];
+    static async getTransactions(addresses: string[], chains: string[]) {
+        let promises = ZapperApi.transactionsPromiseGenerator(addresses, chains)
+        let responses = await Promise.all(promises);
+        let transactions = [];
 
-    //     for(let response of responses) {
-    //         transactions.push(...response.data.data);
-    //     }
+        for(let response of responses) {
+            transactions.push(...response.data.data);
+        }
 
-    //     return transactions;
-    // }
+        return transactions;
+    }
 
     static async getSupportedProtocols(disguise: Disguise) {
         let params = new URLSearchParams();

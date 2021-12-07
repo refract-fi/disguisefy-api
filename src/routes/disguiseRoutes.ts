@@ -8,6 +8,7 @@ import ZapperApi from '../lib/zapperfi';
 import CoinGeckoApi from '../lib/coingecko';
 import Web3Api from '../lib/web3';
 import moment from 'moment';
+import EtherscanAPI from '../lib/etherscan';
 
 const web3 = new Web3Api();
 const cid = process.env.WEB3_CID;
@@ -64,33 +65,48 @@ disguiseRoutes.get('/coins/gas/prices/init', async ctx=> {
     }
 });
 
-// disguiseRoutes.get('/transactions/gas', async ctx => {
-//     let { addresses, chains } = ctx.request.body;
+disguiseRoutes.get('/transactions/gas', async ctx => {
+    let { addresses, chains } = ctx.request.body;
 
-//     try {
-//         let gasContrainer = await ZapperApi.getTransactionsGas(addresses, chains);
+    try {
+        let gasContrainer = await ZapperApi.getTransactionsGas(addresses, chains);
 
-//         ctx.body = gasContrainer;
-//     } catch(e) {
-//         console.log(e);
-//         ctx.status = 500;
-//         ctx.body = e;
-//     }
-// });
+        ctx.body = gasContrainer;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
 
-// disguiseRoutes.get('/transactions', async ctx => {
-//     let { addresses, chains } = ctx.request.body;
+disguiseRoutes.get('/transactions', async ctx => {
+    let { addresses, chains } = ctx.request.body;
 
-//     try {
-//         let transactions = await ZapperApi.getTransactions(addresses, chains);
+    try {
+        let transactions = await ZapperApi.getTransactions(addresses, chains);
+        // let transactions = await EtherscanAPI.getTransactions(addresses)
 
-//         ctx.body = transactions;
-//     } catch(e) {
-//         console.log(e);
-//         ctx.status = 500;
-//         ctx.body = e;
-//     }
-// });
+        ctx.body = transactions;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('/transactions/erc-721', async ctx => {
+    let { addresses } = ctx.request.body;
+
+    try {
+        let transactions = await EtherscanAPI.getERC721Transactions(addresses)
+
+        ctx.body = transactions;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
 
 disguiseRoutes.post('/attestations/:url/sign', async ctx => {
     try {
