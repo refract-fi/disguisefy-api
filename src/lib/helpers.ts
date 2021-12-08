@@ -45,6 +45,39 @@ const emptyAssets = JSON.stringify({
     [AssetCategories.other]: {}
 });
 
+export const supportedBlockExplorers = ['polygon', 'ethereum', 'fantom', 'binance-smart-chain', 'arbitrum']
+
+export const blockExplorers = {
+    polygon: {
+        apiUrl: 'https://api.polygonscan.com',
+        apiKey: process.env.POLYGONSCAN_API_KEY,
+        apiKey2: process.env.POLYGONSCAN_API_KEY_JABUN,
+        priceAction: 'maticprice'
+    },
+    "binance-smart-chain": {
+        apiUrl: 'https://api.bscscan.com',
+        apiKey: process.env.BSCSCAN_API_KEY,
+        apiKey2: process.env.BSCSCAN_API_KEY_JABUN,
+        priceAction: 'bnbprice'
+
+    },
+    ethereum: {
+        apiUrl: 'https://api.etherscan.io',
+        apiKey: process.env.ETHERSCAN_API_KEY,
+        apiKey2: process.env.ETHERSCAN_API_KEY_JABUN,
+        priceAction: 'ethprice'
+    },
+    fantom: {
+        apiUrl: 'https://api.ftmscan.com',
+        apiKey: process.env.FTMSCAN_API_KEY
+    },
+    arbitrum: {
+        apiUrl: 'https://api.arbiscan.io',
+        apiKey: process.env.ARBISCAN_API_KEY
+    }
+
+}
+
 export function getAssetCategories(x = 'wallet'): AssetCategories {
     return (<any>AssetCategories)[x];
 }
@@ -66,20 +99,24 @@ export function isJSON(text: any) {
     }
 }
 
+export function timeout(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAsset, balances: any, currentNetwork: string, productLabel: string) {
     let key = String(assetCategory);
     let tokens: IToken[] = extractTokens(asset, productLabel);
 
-    if(assets[key].hasOwnProperty(asset.address) || (assets[key].hasOwnProperty(`${asset.symbol}-${asset.network}`) && asset.category === 'wallet')) {
-        for(let token of tokens) {
+    if (assets[key].hasOwnProperty(asset.address) || (assets[key].hasOwnProperty(`${asset.symbol}-${asset.network}`) && asset.category === 'wallet')) {
+        for (let token of tokens) {
             // make sure MATIC, FTM and ETH don't override each other or are not merged (same address, different net)
-            if(asset.address == ROOT_ADDRESS || asset.category === 'wallet') {
+            if (asset.address == ROOT_ADDRESS || asset.category === 'wallet') {
                 let foundToken = assets[key][`${asset.symbol}-${asset.network}`].find((element: any) => element.symbol == token.symbol);
-                    foundToken.balance += token.balance;
-                    balances[key] += token.balance;
+                foundToken.balance += token.balance;
+                balances[key] += token.balance;
             } else {
                 let foundToken = assets[key][asset.address].find((element: any) => element.symbol == token.symbol);
-                if(foundToken) {
+                if (foundToken) {
                     foundToken.balance += token.balance;
                     balances[key] += token.balance;
                 } else {
@@ -89,13 +126,13 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
             }
         }
     } else {
-        if((asset.type == 'farm' || asset.type == 'claimable') && asset.tokens && asset.tokens.length > 0) {
-            for(let token of tokens) {
+        if ((asset.type == 'farm' || asset.type == 'claimable') && asset.tokens && asset.tokens.length > 0) {
+            for (let token of tokens) {
                 token.network = currentNetwork;
-                if(token.metaType == 'staking' || token.metaType == 'staked') {
+                if (token.metaType == 'staking' || token.metaType == 'staked') {
                     assets['staking'][token.address] = [token];
                     balances['staking'] += token.balance;
-                } else if(token.metaType == 'claimable' || token.metaType == 'yield') {
+                } else if (token.metaType == 'claimable' || token.metaType == 'yield') {
                     assets['claimable'][token.address] = [token];
                     balances['claimable'] += token.balance;
                 } else {
@@ -104,10 +141,10 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
                 }
             }
         } else {
-            for(let token of tokens) { token.network = currentNetwork; }
-            if(asset.category === 'wallet'){
+            for (let token of tokens) { token.network = currentNetwork; }
+            if (asset.category === 'wallet') {
                 assets[key][`${asset.symbol}-${asset.network}`] = tokens;
-            }else {
+            } else {
                 assets[key][asset.address] = tokens;
             }
             balances[key] += asset.balanceUSD;
@@ -118,7 +155,7 @@ export function addAsset(assets: any, assetCategory: AssetCategories, asset: IAs
 export function addToken(assets: any, assetCategory: AssetCategories, token: IToken) {
     let key = String(assetCategory);
 
-    if(assets[key].hasOwnProperty(token.address)) {
+    if (assets[key].hasOwnProperty(token.address)) {
         assets[key][token.address].balance += token.balanceUSD;
     } else {
         assets[key][token.address] = token;
@@ -127,7 +164,7 @@ export function addToken(assets: any, assetCategory: AssetCategories, token: ITo
 
 export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
     let tokens: IToken[] = [];
-    switch(asset.category) {
+    switch (asset.category) {
         case "debt":
             tokens.push({
                 address: asset.address,
@@ -140,7 +177,7 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
             });
             break;
 
-        case "wallet" :
+        case "wallet":
             tokens.push({
                 address: asset.address,
                 symbol: asset.symbol,
@@ -153,7 +190,7 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
             });
             break;
 
-        case "deposit" :
+        case "deposit":
             tokens.push({
                 address: asset.address,
                 symbol: asset.symbol,
@@ -169,8 +206,8 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
 
         case "claimable":
             let claimableAssetTokens = asset.tokens;
-            if(claimableAssetTokens && claimableAssetTokens.length > 0) {
-                for(let assetToken of claimableAssetTokens) {
+            if (claimableAssetTokens && claimableAssetTokens.length > 0) {
+                for (let assetToken of claimableAssetTokens) {
                     assetToken.img = extractAssetImg(assetToken, asset.category);
                     tokens.push({
                         address: assetToken.address,
@@ -208,11 +245,11 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
                 productLabel: productLabel
             });
             break;
-        
-        case "pool" :
+
+        case "pool":
             let poolAssetTokens = asset.tokens;
-            if(poolAssetTokens && poolAssetTokens.length > 0) {
-                for(let assetToken of poolAssetTokens) {
+            if (poolAssetTokens && poolAssetTokens.length > 0) {
+                for (let assetToken of poolAssetTokens) {
                     assetToken.img = extractAssetImg(assetToken, asset.category);
                 }
             }
@@ -228,7 +265,7 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
             break;
 
         case "staking":
-            if(asset.type == 'base') {
+            if (asset.type == 'base') {
                 tokens.push({
                     address: asset.address,
                     symbol: asset.symbol,
@@ -238,11 +275,11 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
                     img: extractAssetImg(asset, asset.category),
                     productLabel: productLabel
                 });
-            } else if(asset.type == 'pool') {
+            } else if (asset.type == 'pool') {
                 let assetTokens = asset.tokens;
-                if(assetTokens && assetTokens.length > 0) {
-                    for(let assetToken of assetTokens) {
-                        if(assetToken.category == 'pool') {
+                if (assetTokens && assetTokens.length > 0) {
+                    for (let assetToken of assetTokens) {
+                        if (assetToken.category == 'pool') {
                             assetToken.img = `${protocolImgBase}${asset.appId}.png`;
                         } else {
                             assetToken.img = extractAssetImg(assetToken, asset.category);
@@ -259,18 +296,18 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
                     tokens: assetTokens,
                     productLabel: productLabel
                 });
-            } else if(asset.type == 'farm') {
+            } else if (asset.type == 'farm') {
                 let assetTokens = asset.tokens;
                 let symbol = '';
 
-                if(asset.symbol) {
+                if (asset.symbol) {
                     symbol = asset.symbol
-                } else if(assetTokens && assetTokens.length > 0) {
+                } else if (assetTokens && assetTokens.length > 0) {
                     symbol = assetTokens[0].symbol;
                 }
 
-                if(assetTokens && assetTokens.length > 0) {
-                    for(let assetToken of assetTokens) {
+                if (assetTokens && assetTokens.length > 0) {
+                    for (let assetToken of assetTokens) {
                         assetToken.img = `${protocolImgBase}${asset.appId}.png`;
                         assetToken.protocol = asset.appId;
                         assetToken.productLabel = productLabel
@@ -302,12 +339,12 @@ export function extractTokens(asset: IAsset, productLabel: string): IToken[] {
 export function extractAssetImg(asset: any, assetCategory: string) {
     let img = null;
 
-    if(asset.img && asset.img != '') {
-        if(assetCategory != AssetCategories.nft) {
+    if (asset.img && asset.img != '') {
+        if (assetCategory != AssetCategories.nft) {
             img = asset.img;
         }
     } else {
-        if(assetCategory != AssetCategories.nft) {
+        if (assetCategory != AssetCategories.nft) {
             img = `${imgBase}/ethereum/${asset.address}.png`; // network should be dynamic
         }
     }
@@ -316,7 +353,24 @@ export function extractAssetImg(asset: any, assetCategory: string) {
 }
 
 export function extractGas(transactions: any, gasContrainer: any) {
-    for(let transaction of transactions) {
+    for (let transaction of transactions) {
         gasContrainer[transaction.network] += transaction.gas;
     }
+}
+
+export function extractZapperGas(transactions: any){
+    let totalGas: number = 0
+    transactions.map((transaction: any) => {
+        totalGas += transaction.gas
+    })
+    return totalGas
+}
+
+export function extractEtherscanGas(transactions: any) {
+    let totalGas: number = 0
+    transactions.map((transaction: any) => {
+        totalGas += (transaction.gasUsed * (transaction.gasPrice / 1e18))
+    })
+
+    return totalGas
 }

@@ -16,6 +16,7 @@ import {
     extractGas
 } from './helpers';
 import Price from '../models/price';
+import EtherscanAPI from './etherscan';
 
 const ALL_CHAINS = 'all';
 
@@ -44,6 +45,8 @@ class ZapperApi {
             extractGas(transactions, gasContrainer);
         }
 
+        let ERC721gas = await EtherscanAPI.getTransactionsERC721Gas(addresses, chains)
+
         for(let [address, gasTokens] of Object.entries(addressGasContainers)){
             try{
                 //@ts-ignore
@@ -53,12 +56,17 @@ class ZapperApi {
                             network: network
                         }
                     })
+                    if(network === 'ethereum'){
+                        addressGasContainers[address].ethereumERC721 = ERC721gas
+                        //@ts-ignore
+                        addressGasContainers[address].ethereumERC721USD = ERC721gas * gasToken?.priceUSD
+                    }
                     if(!gasToken){
                         // add throw error
                     }
                     //@ts-ignore
                     addressGasContainers[address][`${network}USD`] = amount * gasToken?.priceUSD
-                }    
+                }   
             }catch(e){
                 console.log(e)
             }
@@ -217,6 +225,17 @@ class ZapperApi {
             throw e;
         }
     }
+    static async getNormalTxs(addresses: string[], chain: string){
+        let promises = ZapperApi.normalTxsPromiseGenerator(addresses, chain)
+        let responses = await Promise.all(promises);
+        let transactions = [];
+
+        for(let response of responses) {
+            transactions.push(...response.data.data);
+        }
+
+        return transactions;
+    }
 
     private static balancePromiseGenerator(disguise: Disguise, networks: any) { // find TS compliant solutions to interface protocols
         let promises = [];
@@ -265,38 +284,20 @@ class ZapperApi {
 
         return promises;
     }
-    // static async getTransactions(disguise: Disguise, saveCache: boolean = false) {
 
-    //     try {
-    //         let uniqueNetworks: any = await ZapperApi.getSupportedNetworks(disguise); // TODO: how to handle returned type Promise<string[]> doesn't work
-    //         let promises = ZapperApi.balancePromiseGenerator(disguise, uniqueNetworks);
-    //         let responses = await Promise.all(promises);
-
-    //         for (let response of responses) {
-    //             let queryUrl = new url.URL(response.config.url || '');
-    //             let currentNetwork = queryUrl.searchParams.get('network') || '';
-
-    //             let protocolBalances = response.data;
-    //             let addressesProtocol: IAddressProtocol[] = Object.values(protocolBalances);
-
-
-    //         }
-
-    //         let addressTransactions = new AddressBalances(balances, assets, disguise.options);
-    //         let preset = new Preset(disguise);
-    //         preset.filter(addressTransactions);
-
-    //         // do not wait for cache creation when regenerating while viewing
-    //         if (saveCache) {
-    //             Disguise.saveCache(disguise, addressTransactions);
-    //         }
-
-    //         return addressTransactions;
-    //     } catch (e) {
-    //         console.log(`[zapperFi.getBalances]: ${e}`);
-    //         throw e;
-    //     }
-    // }
+    private static normalTxsPromiseGenerator(addresses: string[], chain: string){
+        let promises = [];
+        let params = new URLSearchParams();
+        params.append('api_key', ZapperApi.apiKey || '');
+        for(let address of addresses){
+            params.append('network', chain);
+            params.append('address', address.toLowerCase());
+            params.append('addresses[]', address.toLowerCase());
+            let url = `${ZapperApi.apiUrl}/transactions?` + params.toString();
+            promises.push(axios.get(url));
+        }
+        return promises
+    }
 }
 
 export default ZapperApi;

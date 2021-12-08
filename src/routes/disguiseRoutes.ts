@@ -9,6 +9,7 @@ import CoinGeckoApi from '../lib/coingecko';
 import Web3Api from '../lib/web3';
 import moment from 'moment';
 import EtherscanAPI from '../lib/etherscan';
+import BlockExplorersAPI from '../lib/blockExplorers';
 
 const web3 = new Web3Api();
 const cid = process.env.WEB3_CID;
@@ -79,12 +80,25 @@ disguiseRoutes.get('/transactions/gas', async ctx => {
     }
 });
 
+disguiseRoutes.get('/transactions/stats', async ctx => {
+    let { addresses, chains } = ctx.request.body;
+
+    try {
+        let gasContrainer = await BlockExplorersAPI.getTxsStats(addresses, chains);
+
+        ctx.body = gasContrainer;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
 disguiseRoutes.get('/transactions', async ctx => {
     let { addresses, chains } = ctx.request.body;
 
     try {
         let transactions = await ZapperApi.getTransactions(addresses, chains);
-        // let transactions = await EtherscanAPI.getTransactions(addresses)
 
         ctx.body = transactions;
     } catch(e) {
@@ -95,10 +109,10 @@ disguiseRoutes.get('/transactions', async ctx => {
 });
 
 disguiseRoutes.get('/transactions/erc-721', async ctx => {
-    let { addresses } = ctx.request.body;
+    let { addresses, chains } = ctx.request.body;
 
     try {
-        let transactions = await EtherscanAPI.getERC721Transactions(addresses)
+        let transactions = await EtherscanAPI.getTransactionsERC721(addresses, chains)
 
         ctx.body = transactions;
     } catch(e) {
@@ -107,6 +121,21 @@ disguiseRoutes.get('/transactions/erc-721', async ctx => {
         ctx.body = e;
     }
 });
+
+disguiseRoutes.get('/transactions/erc-721/gas', async ctx => {
+    let { addresses, chains } = ctx.request.body;
+
+    try {
+        let gas = await EtherscanAPI.getTransactionsERC721Gas(addresses, chains)
+
+        ctx.body = gas;
+    } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
 
 disguiseRoutes.post('/attestations/:url/sign', async ctx => {
     try {
