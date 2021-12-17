@@ -183,9 +183,6 @@ class ZapperApi {
                             }
                             if(asset.category == 'base'){
                                 asset.category = 'wallet'
-                                if(asset.symbol == 'ETH'){
-                                    console.log('hey')
-                                }
                             }
 
 

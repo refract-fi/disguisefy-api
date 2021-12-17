@@ -86,8 +86,12 @@ class Disguise extends Model<DisguiseAttributes> {
   static async generate(addresses: string[], name: string, duration: number, preset: number, password: string | null, options: DisguiseOptions, cache: boolean = true) {
     let url = Disguise.generateUrl();
     let generationTimestamp = Number(moment.utc().format('X'));
-    let expirationTimestamp = generationTimestamp + duration;
+    let expirationTimestamp: number | undefined = generationTimestamp + duration;
     let addressBalances, disguise;
+
+    if(options.isSnapshot){
+      expirationTimestamp = undefined
+    }
 
     try {
       let disguisePassword = password != null ? Disguise.hashPassword(password) : null;

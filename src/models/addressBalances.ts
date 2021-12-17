@@ -398,7 +398,6 @@ export default class AddressBalances {
                             if(asset.protocol === 'wallet'){
                                 // protocolBalances.wallet = 0
                             } else {
-                                console.log(asset.productLabel)
                                 protocolBalances[asset.protocol] = 0
                                 protocolPercentages = {...protocolPercentages, [asset.protocol]: {percentage: 0, title: asset.productLabel}}
                             }
