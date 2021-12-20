@@ -16,6 +16,7 @@
     "deploy": "tsc && node ./bin/app.js"
   },
   "dependencies": {
+    "@binance/connector": "^1.6.0",
     "@types/bcrypt": "^5.0.0",
     "@types/koa-bodyparser": "^4.3.3",
     "@types/koa-cors": "^0.0.2",

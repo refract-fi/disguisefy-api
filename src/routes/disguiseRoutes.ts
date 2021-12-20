@@ -10,6 +10,7 @@ import Web3Api from '../lib/web3';
 import moment from 'moment';
 import EtherscanAPI from '../lib/etherscan';
 import BlockExplorersAPI from '../lib/blockExplorers';
+import BinanceAPI from '../lib/binance';
 
 const web3 = new Web3Api();
 const cid = process.env.WEB3_CID;
@@ -74,6 +75,18 @@ disguiseRoutes.get('/transactions/gas', async ctx => {
 
         ctx.body = gasContrainer;
     } catch(e) {
+        console.log(e);
+        ctx.status = 500;
+        ctx.body = e;
+    }
+});
+
+disguiseRoutes.get('/binance/balances', async ctx => {
+    let { apiToken, secretApiKey } = ctx.request.body;
+
+    try{
+        ctx.body = await BinanceAPI.getBalances(apiToken, secretApiKey)
+    } catch(e){
         console.log(e);
         ctx.status = 500;
         ctx.body = e;

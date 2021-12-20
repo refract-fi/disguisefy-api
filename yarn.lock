@@ -28,6 +28,14 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@binance/connector@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@binance/connector/-/connector-1.6.0.tgz#3aea0b8aa320e2d02d040252db726a37ab4149a3"
+  integrity sha512-s3wsjzbL0g2C5YhMuMW0O+NTV7kNakkg3ybWMDLN39WLWCCWtAhgsszOomWwLCgCz7Y03enTc6UcOYzc5HR7cg==
+  dependencies:
+    axios "^0.21.4"
+    ws "^7.5.0"
+
 "@cspotcode/source-map-consumer@0.8.0":
   version "0.8.0"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-consumer/-/source-map-consumer-0.8.0.tgz"
@@ -3712,6 +3720,11 @@ ws@7.4.6:
   version "7.4.6"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.6.tgz#5654ca8ecdeee47c33a9a4bf6d28e2be2980377c"
   integrity sha512-YmhHDO4MzaDLB+M9ym/mDA5z0naX8j7SIlT8f8z+I0VtzsRbekxEutHSme7NPS2qE8StCYQNUnfWdXta/Yu85A==
+
+ws@^7.5.0:
+  version "7.5.6"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.6.tgz#e59fc509fb15ddfb65487ee9765c5a51dec5fe7b"
+  integrity sha512-6GLgCqo2cy2A2rjCNFlxQS6ZljG/coZfZXclldI8FB/1G3CCI36Zd8xy2HrFVACi8tfk5XrgLQEk+P0Tnz9UcA==
 
 xtend@~4.0.1:
   version "4.0.2"
