@@ -35,7 +35,7 @@ class CronManager {
         let result = await CoinGeckoApi.updateGasCoinsPrices();
 
         if(!result) {
-            throw new Error(`CoinGeckoApi.updateGasCoinsPrices() failed.`)
+            throw new Error(`CoinGeckoApi.updateGasCoinsPrices() failed.`);
         }
     }
 }

@@ -110,15 +110,13 @@ class CoinGeckoApi {
             for(let [network, price] of Object.entries(updatedGasCoinsPrices)) {
                 // @ts-ignore
                 let newPrice = parseFloat(price.usd);
-                console.log(newPrice);
 
                 await Price.update({
                     priceUSD: newPrice,
                     updatedAt: moment().unix(),
                     updatedAtDisplay: moment.utc().format('YYYY-MM-DD HH:mm:ss')
                 }, {
-                    where: { sourceIdentifier: network },
-                    logging: console.log
+                    where: { sourceIdentifier: network }
                 });
             }
             
