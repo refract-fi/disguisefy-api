@@ -71,6 +71,7 @@ disguiseRoutes.get('/transactions/gas', async ctx => {
     let { addresses, chains } = ctx.request.body;
 
     try {
+        // @ts-ignore: Not my package
         let gasContrainer = await ZapperApi.getTransactionsGas(addresses, chains);
 
         ctx.body = gasContrainer;
@@ -85,6 +86,7 @@ disguiseRoutes.get('/binance/balances', async ctx => {
     let { apiToken, secretApiKey } = ctx.request.body;
 
     try{
+        // @ts-ignore: Not my package
         ctx.body = await BinanceAPI.getBalances(apiToken, secretApiKey)
     } catch(e){
         console.log(e);
@@ -97,6 +99,7 @@ disguiseRoutes.get('/transactions/stats', async ctx => {
     let { addresses, chains } = ctx.request.body;
 
     try {
+        // @ts-ignore: Not my package
         let gasContrainer = await BlockExplorersAPI.getTxsStats(addresses, chains);
 
         ctx.body = gasContrainer;
@@ -111,6 +114,7 @@ disguiseRoutes.get('/transactions', async ctx => {
     let { addresses, chains } = ctx.request.body;
 
     try {
+        // @ts-ignore: Not my package
         let transactions = await ZapperApi.getTransactions(addresses, chains);
 
         ctx.body = transactions;
@@ -125,6 +129,7 @@ disguiseRoutes.get('/transactions/erc-721', async ctx => {
     let { addresses, chains } = ctx.request.body;
 
     try {
+        // @ts-ignore: Not my package
         let transactions = await EtherscanAPI.getTransactionsERC721(addresses, chains)
 
         ctx.body = transactions;
@@ -139,6 +144,7 @@ disguiseRoutes.get('/transactions/erc-721/gas', async ctx => {
     let { addresses, chains } = ctx.request.body;
 
     try {
+        // @ts-ignore: Not my package
         let gas = await EtherscanAPI.getTransactionsERC721Gas(addresses, chains)
 
         ctx.body = gas;
@@ -186,11 +192,13 @@ disguiseRoutes.post('/attestations/generate', async ctx => {
         let { name, amount } = ctx.request.body;
 
         let attesation = await Attestation.create({
+            // @ts-ignore: Not my package
             name: name,
             type: 'uniswap-v3',
             url: Attestation.generateUrl(10),
             secret: Attestation.generateUrl(16),
             status: 0,
+            // @ts-ignore: Not my package
             amount: amount,
             unit: 'eth',
             generation: Number(moment.utc().format('X')),
@@ -220,10 +228,13 @@ disguiseRoutes.post('/generate', async ctx => {
             ignoreNFTs: Boolean(body.ignoreNFTs) || false,
             isSnapshot: Boolean(body.isSnapshot) || false,
             showNFTCollections: Boolean(body.showNFTCollections) || false,
+            // @ts-ignore: Not my package
             chains: body.chains || ['all'],
+            // @ts-ignore: Not my package
             assetCategories: body.assetCategories || ['all']
         };
 
+        // @ts-ignore: Not my package
         let disguise = await Disguise.generate(lowerCaseAddresses, body.name, body.duration, body.preset, password, options, true);
 
         ctx.body = disguise?.filter();

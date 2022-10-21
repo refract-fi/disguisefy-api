@@ -22,7 +22,7 @@ const ALL_CHAINS = 'all';
 
 class ZapperApi {
     private static apiKey?: string = process.env.ZAPPERFI_API_KEY;
-    private static apiUrl: string = `https://api.zapper.fi/v1`;
+    private static apiUrl: string = `https://api.zapper.fi/v2`;
     // private static apiUrl: string = `http://localhost:3408`;
 
     constructor() {

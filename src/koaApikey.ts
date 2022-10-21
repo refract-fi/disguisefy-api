@@ -23,6 +23,7 @@ function getApiKeysFromEnvironment(apiKeyServerEnvironmentVariableName: any) {
 const koaApikey = function (options: object = {}) {
     const defaultOptions = {
         apiKeyServerEnvironmentVariableName: 'REST_API_KEYS',
+// @ts-ignore: Not my package
         unprotectedRoutes: []
     };
     options = Object.assign({}, defaultOptions, options);
